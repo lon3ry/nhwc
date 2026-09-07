@@ -9,6 +9,7 @@ namespace caches
 
 template <typename T, typename KeyT = int> class LRUCache
 {
+    const std::size_t size_;
     // Each entry is {key, page}; most recently used entry is at the front.
     std::list<std::pair<KeyT, T>> cache_;
 
