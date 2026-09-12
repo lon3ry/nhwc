@@ -5,3 +5,10 @@ set_target_properties(main PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
 )
+
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME driver COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/lru-test.py" "$<TARGET_FILE:main>"
+    )
+endif()
