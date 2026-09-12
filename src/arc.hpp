@@ -41,7 +41,6 @@ public:
     template <typename F> bool lookup_update(KeyT key, F slow_get_page)
     {
         bool hit_recents = recents_.lookup(key);
-
         if (hit_recents)
         {
             auto item = recents_.pop_most_recently_used();
