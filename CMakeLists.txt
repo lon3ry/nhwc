@@ -6,9 +6,10 @@ set_target_properties(main PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 
+enable_testing()
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)
     add_test(NAME driver COMMAND "${Python3_EXECUTABLE}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/lru-test.py" "$<TARGET_FILE:main>"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/arc-test.py" "$<TARGET_FILE:main>"
     )
 endif()

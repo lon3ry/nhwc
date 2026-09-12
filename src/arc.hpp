@@ -1,11 +1,10 @@
+#pragma once
+
+#include <algorithm>
 #include <cstddef>
 
-#include <list>
-#include <unordered_map>
-#include <cstddef>
-
-#include "lru-list.hpp"
-#include "ghost-lru-list.hpp"
+#include "lru-queue.hpp"
+#include "ghost-lru-queue.hpp"
 
 namespace caches
 {
@@ -14,25 +13,25 @@ template <typename T, typename KeyT = int> class ARCCache
 {
     const std::size_t size_;
 
-    LRUList<T, KeyT> recents_;           // list of once seen pages, T1
-    LRUList<T, KeyT> frequenters_;       // list of twice seen pages, T2
-    GhostLRUCache<KeyT> old_recents_;     // ghost cache for T1, named B1
-    GhostLRUCache<KeyT> old_frequenters_; // ghost cache for T2, named B2
+    LRUQueue<T, KeyT> recents_;               // T1: pages seen only once recently
+    LRUQueue<T, KeyT> frequenters_;           // T2: pages seen at least twice recently
+    GhostLRUQueue<KeyT> evicted_recents_;     // B1: ghost cache for T1
+    GhostLRUQueue<KeyT> evicted_frequenters_; // B2: ghost cache for T2
 
     std::size_t p_ = 0;
 
     void replace(KeyT key)
     {
-        if (!recents_.empty() && (recents_.size() > p_ || (old_frequenters_.has(key) &&
+        if (!recents_.empty() && (recents_.size() > p_ || (evicted_frequenters_.has(key) &&
             p_ == recents_.size())))
         {
-            auto page = recents_.pop_last_recently_used();
-            old_recents_.insert(page);
+            auto item = recents_.pop_last_recently_used();
+            evicted_recents_.insert(item->first);
         }
         else
         {
-            auto page = frequenters_.pop_last_recently_used();
-            old_frequenters_.insert(page);
+            auto item = frequenters_.pop_last_recently_used();
+            evicted_frequenters_.insert(item->first);
         }
     }
 
@@ -42,69 +41,79 @@ public:
     template <typename F> bool lookup_update(KeyT key, F slow_get_page)
     {
         bool hit_recents = recents_.lookup(key);
-        bool hit_frequenters = frequenters_.lookup(key);
 
         if (hit_recents)
         {
-                auto page = recents_.pop_most_recently_used();
-                frequenters_.insert(key, page);
-                return true;
+            auto item = recents_.pop_most_recently_used();
+            frequenters_.insert(item->first, item->second);
+            return true;
         }
 
+        bool hit_frequenters = frequenters_.lookup(key);
         if (hit_frequenters)
             return true;
 
-        bool hit_old_recents = old_recents_.lookup(key);
-        if (hit_old_recents)
+        bool hit_evicted_recents = evicted_recents_.lookup(key);
+        if (hit_evicted_recents)
         {
-            std::size_t delta1 = old_recents_.size() >= old_frequenters_.size() ? 1 :
-                                 old_frequenters_.size() / old_recents_.size();
+            std::size_t delta1 = evicted_recents_.size() >= evicted_frequenters_.size() ? 1 :
+                                 evicted_frequenters_.size() / evicted_recents_.size();
             p_ = std::min(p_ + delta1, size_);
+
             replace(key);
-            old_recents_.pop_most_recently_used();
+            evicted_recents_.pop_most_recently_used();
+
             auto page = slow_get_page(key);
             frequenters_.insert(key, page);
+
             return false;
         }
 
-        bool hit_old_frequenters = old_frequenters_.lookup(key);
-        if (hit_old_frequenters)
+        bool hit_evicted_frequenters = evicted_frequenters_.lookup(key);
+        if (hit_evicted_frequenters)
         {
-            std::size_t delta2 = old_frequenters_.size() >= old_recents_.size() ? 1 :
-                                 old_recents_.size() / old_frequenters_.size();
-            p_ = std::max(p_ - delta2, size_);
+            std::size_t delta2 = evicted_frequenters_.size() >= evicted_recents_.size() ? 1 :
+                                 evicted_recents_.size() / evicted_frequenters_.size();
+            // p_ = std::max<long long>(p_ - delta2, 0);
+            p_ = (p_ > delta2) ? (p_ - delta2) : 0;
+
+            evicted_frequenters_.pop_most_recently_used();
             replace(key);
-            old_frequenters_.pop_most_recently_used();
+
             auto page = slow_get_page(key);
             frequenters_.insert(key, page);
+
             return false;
         }
 
-        if (size_ > recents_.size() + old_recents_.size())
+        if (size_ == recents_.size() + evicted_recents_.size())
         {
             if (recents_.size() < size_)
             {
-                old_recents_.pop_most_recently_used();
                 replace(key);
+                evicted_recents_.pop_last_recently_used();
             }
             else
             {
-                recents_.pop_most_recently_used();
+                recents_.pop_last_recently_used();
             }
         }
         else
         {
-            auto current_size = recents_.size() + frequenters_.size() + old_recents_.size() +
-                                old_frequenters_.size();
+            auto current_size = recents_.size() + frequenters_.size() + evicted_recents_.size() +
+                                evicted_frequenters_.size();
             if (current_size >= size_)
             {
-                if (current_size == size_)
-                    old_frequenters_.pop_last_recently_used();
+                if (current_size == 2 * size_)
+                    evicted_frequenters_.pop_last_recently_used();
+
                 replace(key);
             }
-            auto page = slow_get_page(key);
-            recents_.insert(key, page);
         }
+
+        auto page = slow_get_page(key);
+        recents_.insert(key, page);
+
         return false;
     }
 };

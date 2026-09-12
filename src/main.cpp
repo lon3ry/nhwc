@@ -13,12 +13,15 @@ int main()
     std::cin >> cache_size >> data_len;
 
     caches::ARCCache<Page, PageId> cache{static_cast<std::size_t>(cache_size)};
+
     auto load = [](PageId key) { return key; };
+
     int hits = 0;
     for (int i = 0; i < data_len; i++)
     {
         PageId key;
         std::cin >> key;
+
         bool hit = cache.lookup_update(key, load);
         if (hit)
             ++hits;

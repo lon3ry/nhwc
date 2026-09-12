@@ -1,21 +1,26 @@
+#pragma once
+
 #include <list>
 #include <unordered_map>
+#include <optional>
 #include <cstddef>
 
 namespace caches
 {
 
 // GhostCache does not store the page data itselfs, only the key
-template <typename KeyT = int> class GhostLRUCache
+template <typename KeyT = int> class GhostLRUQueue
 {
     using CacheList = std::list<KeyT>;
     CacheList cache_;
 
     using CacheListIt = typename CacheList::iterator;
     std::unordered_map<KeyT, CacheListIt> hash_;
+
 public:
-    std::size_t size() { return cache_.size(); }
-    bool has(KeyT key) { return hash_.find(key) != hash_.end(); }
+    std::size_t size() const { return cache_.size(); }
+    bool empty() const { return size() == 0; }
+    bool has(KeyT key) const { return hash_.find(key) != hash_.end(); }
 
     bool lookup(KeyT key)
     {
@@ -35,19 +40,27 @@ public:
         hash_.emplace(key, cache_.begin());
     }
 
-    KeyT pop_most_recently_used()
+    std::optional<KeyT> pop_most_recently_used()
     {
+        if (empty())
+            return std::nullopt;
+
         hash_.erase(cache_.front());
         auto key = cache_.front();
         cache_.pop_front();
+
         return key;
     }
 
-    KeyT pop_last_recently_used()
+    std::optional<KeyT> pop_last_recently_used()
     {
+        if (empty())
+            return std::nullopt;
+
         hash_.erase(cache_.back());
         auto key = cache_.back();
         cache_.pop_back();
+
         return key;
     }
 };
