@@ -13,7 +13,7 @@ int main()
     // TODO: add input check
     std::cin >> cache_size >> data_len;
 
-    caches::SimplifiedTwoQueueCache<Page, PageId> cache{static_cast<std::size_t>(cache_size)};
+    caches::FullTwoQueueCache<Page, PageId> cache{static_cast<std::size_t>(cache_size)};
     auto load = [](PageId key) { return key; };
     int hits = 0;
     for (int i = 0; i < data_len; i++)
