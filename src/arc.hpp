@@ -60,7 +60,7 @@ public:
             p_ = std::min(p_ + delta1, size_);
 
             replace(key);
-            evicted_recents_.pop_most_recently_used();
+            evicted_recents_.erase(key);
 
             auto page = slow_get_page(key);
             frequenters_.insert(key, page);
@@ -76,8 +76,8 @@ public:
             // p_ = std::max<long long>(p_ - delta2, 0);
             p_ = (p_ > delta2) ? (p_ - delta2) : 0;
 
-            evicted_frequenters_.pop_most_recently_used();
             replace(key);
+            evicted_frequenters_.erase(key);
 
             auto page = slow_get_page(key);
             frequenters_.insert(key, page);
@@ -89,8 +89,8 @@ public:
         {
             if (recents_.size() < size_)
             {
-                replace(key);
                 evicted_recents_.pop_last_recently_used();
+                replace(key);
             }
             else
             {

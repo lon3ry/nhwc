@@ -34,6 +34,16 @@ public:
         return false;
     }
 
+    void erase(KeyT key)
+    {
+        auto hit = hash_.find(key);
+        if (hit == hash_.end())
+            return;
+        auto eltit = hit->second;
+        cache_.erase(eltit);
+        hash_.erase(hit);
+    }
+
     void insert(KeyT key)
     {
         cache_.emplace_front(key);
