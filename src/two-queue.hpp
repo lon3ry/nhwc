@@ -1,8 +1,6 @@
 #pragma once
 
 #include <cstddef>
-#include <list>
-#include <unordered_map>
 
 #include "lru-queue.hpp"
 #include "ghost-lru-queue.hpp"
