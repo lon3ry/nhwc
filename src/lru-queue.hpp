@@ -20,6 +20,7 @@ template <typename T, typename KeyT = int> class LRUQueue
 public:
     std::size_t size() const { return cache_.size(); }
     bool empty() const { return size() == 0; }
+    bool has(KeyT key) const { return hash_.find(key) != hash_.end(); }
 
     bool lookup(KeyT key)
     {
