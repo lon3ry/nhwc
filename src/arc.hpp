@@ -11,7 +11,7 @@ namespace caches
 
 template <typename T, typename KeyT = int> class ARCCache
 {
-    const std::size_t size_;
+    const std::size_t capacity_;
 
     LRUQueue<T, KeyT> recents_;               // T1: pages seen only once recently
     LRUQueue<T, KeyT> frequenters_;           // T2: pages seen at least twice recently
@@ -36,7 +36,7 @@ template <typename T, typename KeyT = int> class ARCCache
     }
 
 public:
-    explicit ARCCache(std::size_t size) : size_(size) {}
+    explicit ARCCache(std::size_t capacity) : capacity_(capacity) {}
 
     template <typename F> bool lookup_update(KeyT key, F slow_get_page)
     {
@@ -57,7 +57,7 @@ public:
         {
             std::size_t delta1 = evicted_recents_.size() >= evicted_frequenters_.size() ? 1 :
                                  evicted_frequenters_.size() / evicted_recents_.size();
-            p_ = std::min(p_ + delta1, size_);
+            p_ = std::min(p_ + delta1, capacity_);
 
             replace(key);
             evicted_recents_.erase(key);
@@ -85,9 +85,9 @@ public:
             return false;
         }
 
-        if (size_ == recents_.size() + evicted_recents_.size())
+        if (capacity_ == recents_.size() + evicted_recents_.size())
         {
-            if (recents_.size() < size_)
+            if (recents_.size() < capacity_)
             {
                 evicted_recents_.pop_last_recently_used();
                 replace(key);
@@ -101,9 +101,9 @@ public:
         {
             auto current_size = recents_.size() + frequenters_.size() + evicted_recents_.size() +
                                 evicted_frequenters_.size();
-            if (current_size >= size_)
+            if (current_size >= capacity_)
             {
-                if (current_size == 2 * size_)
+                if (current_size == 2 * capacity_)
                     evicted_frequenters_.pop_last_recently_used();
 
                 replace(key);
