@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "arc.hpp"
+#include "two-queue.hpp"
 
 using Page = int;
 using PageId = int;
@@ -12,8 +12,7 @@ int main()
     // TODO: add input check
     std::cin >> cache_size >> data_len;
 
-    caches::ARCCache<Page, PageId> cache{static_cast<std::size_t>(cache_size)};
-
+    caches::FullTwoQueueCache<Page, PageId> cache{static_cast<std::size_t>(cache_size)};
     auto load = [](PageId key) { return key; };
 
     int hits = 0;
