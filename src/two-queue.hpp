@@ -121,8 +121,8 @@ template <typename T, typename KeyT = int> class FullTwoQueueCache
 public:
     explicit FullTwoQueueCache(std::size_t size) : 
         capacity_(size),
-        kin_(size / 4),
-        kout_(size / 2)
+        kin_((size + 3) / 4),
+        kout_((size + 1) / 2)
     {};
     template <typename F> bool lookup_update(KeyT key, F slow_get_page)
     {
@@ -143,7 +143,7 @@ public:
             T page = slow_get_page(key);
             am_.emplace_front(key, page);
             am_hash_.emplace(key, am_.begin());
-            return true;
+            return false;
         }
 
         auto hit_al_in = al_in_hash_.find(key);
