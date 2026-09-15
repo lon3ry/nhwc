@@ -3,6 +3,7 @@
 #include <list>
 #include <unordered_map>
 #include <cstddef>
+#include <functional>
 
 namespace caches
 {
@@ -20,7 +21,7 @@ template <typename T, typename KeyT = int> class LRUCache
 public:
     explicit LRUCache(std::size_t size) : size_(size) {}
     std::size_t max_capacity() const { return size_; }
-    template <typename F> bool lookup_update(KeyT key, F slow_get_page)
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
         if (max_capacity() == 0)
             return false;

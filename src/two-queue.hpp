@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 
 #include "lru-queue.hpp"
 #include "ghost-lru-queue.hpp"
@@ -45,7 +46,7 @@ public:
         kout_((capacity + 1) / 2)
     {};
 
-    template <typename F> bool lookup_update(KeyT key, F slow_get_page)
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
         auto hit_am = am_.lookup(key);
         if (hit_am)

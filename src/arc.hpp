@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 
 #include "lru-queue.hpp"
 #include "ghost-lru-queue.hpp"
@@ -38,7 +39,7 @@ template <typename T, typename KeyT = int> class ARCCache
 public:
     explicit ARCCache(std::size_t capacity) : capacity_(capacity) {}
 
-    template <typename F> bool lookup_update(KeyT key, F slow_get_page)
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
         bool hit_recents = recents_.lookup(key);
         if (hit_recents)
