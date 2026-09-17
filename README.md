@@ -5,7 +5,7 @@ A cache algorithms research homework from [Kostantin Vladimirov's course](https:
 
 ## Building
 
-You need to have [CMake](https://cmake.org) 3.11+ and a compiler with C++20 support installed.
+You need to have [CMake](https://cmake.org) 3.14+, compatible build tools (see [CMake Generators](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) for more information) and a compiler with C++20 support installed.
 
 ```shell
 cmake -B build
@@ -14,7 +14,7 @@ cmake --build build
 
 ## Testing
 
-You can run tests with:
+We use [GoogleTest](https://google.github.io/googletest) framework for our tests. You can run them with:
 ```shell
 ctest --test-dir build --output-on-failure
 ```
