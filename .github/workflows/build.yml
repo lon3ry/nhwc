@@ -1,0 +1,21 @@
+name: Build and test
+on:
+  push:
+    branches:
+      - main
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake make clang
+      - name: Compile
+        run: |
+          cmake -B build
+          cmake --build build
+      - name: Run tests
+        run: |
+          ctest --test-dir build --output-on-failure
