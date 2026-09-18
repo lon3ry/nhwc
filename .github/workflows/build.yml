@@ -5,13 +5,15 @@ on:
       - main
 jobs:
   main:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-2025
     steps:
       - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y cmake make clang
       - name: Compile
         run: |
           cmake -B build
