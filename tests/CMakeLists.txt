@@ -30,4 +30,5 @@ target_link_libraries(
 )
 
 include(GoogleTest)
+<<<<<<< HEAD
 gtest_discover_tests(nhwc-test)
