@@ -28,9 +28,9 @@ template <typename T, typename KeyT>
 class LFUCache
 {
 	public:
-		LFUCache(int capacity) : capacity_(capacity), min_freq_(1) { }
+		LFUCache(std::size_t capacity) : capacity_(capacity), min_freq_(1) { }
 
-		using node_iter = std::list<Record<T, KeyT>>::iterator;
+		using node_iter = typename std::list<Record<T, KeyT>>::iterator; 
 		using dlist = std::list<Record<T, KeyT>>;
 
 		template <typename F>
@@ -72,7 +72,7 @@ bool LFUCache<T, KeyT>::lookup_update(KeyT key, F slow_get_page)
 	}
 	else
 	{
-		VERBOSE(std::cout << "could bot find requested element" << std::endl;)
+		VERBOSE(std::cout << "could not find requested element" << std::endl;)
 
 		T val = slow_get_page(key);
 		Record<T, KeyT> rec {.key = key, .value = val, .freq = 1};

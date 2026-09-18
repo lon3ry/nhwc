@@ -1,29 +1,29 @@
 #include <iostream>
+
 #include "LFU_cache.hpp"
 
-
-int slow_get_page(int key);
-
+using Page = int;
+using PageId = int;
 
 int main()
 {
-    LFUCache<int, int> cache(2);
+    int cache_size, data_len;
 
-    int test_data[] = {1, 2, 1, 2, 3, 1, 2};
+    // TODO: add input check
+    std::cin >> cache_size >> data_len;
 
-    for(int i : test_data)
+    LFUCache<Page, PageId> cache{static_cast<std::size_t>(cache_size)};
+    auto load = [](PageId key) { return key; };
+
+    int hits = 0;
+    for (int i = 0; i < data_len; i++)
     {
-        VERBOSE(std::cout << "Current data request: " << i << std::endl;)
-        cache.lookup_update(i, slow_get_page);
-        VERBOSE(cache.cache_dump();)
-        std::cout << "-----------" << std::endl;
+        PageId key;
+        std::cin >> key;
+
+        bool hit = cache.lookup_update(key, load);
+        if (hit)
+            ++hits;
     }
-
-    return 0;
-}
-
-
-int slow_get_page(int key)
-{
-    return key;
+    std::cout << hits << std::endl;
 }
