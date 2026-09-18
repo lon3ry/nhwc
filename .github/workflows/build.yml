@@ -3,10 +3,10 @@ on:
   push:
     branches:
       - main
-  paths-ignore:
-    - README.md
-    - .editorconfig
-    - .gitignore
+    paths-ignore:
+      - README.md
+      - .editorconfig
+      - .gitignore
 jobs:
   main:
     runs-on: ${{ matrix.os }}

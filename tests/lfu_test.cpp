@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "../LFU_cache.hpp"
+#include "lfu_cache.hpp"
 
 TEST(LFUCacheTest, CacheHitsTest)
 {

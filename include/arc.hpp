@@ -4,8 +4,8 @@
 #include <cstddef>
 #include <functional>
 
-#include "lru-queue.hpp"
-#include "ghost-lru-queue.hpp"
+#include "lru_queue.hpp"
+#include "ghost_lru_queue.hpp"
 
 namespace caches
 {

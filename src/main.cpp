@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "two-queue.hpp"
+#include "two_queue.hpp"
 
 using Page = int;
 using PageId = int;

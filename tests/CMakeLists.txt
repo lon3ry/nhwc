@@ -16,19 +16,19 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(
-    nhwc-test
-    arc-test.cpp
-    lru-test.cpp
-    two-queue-test.cpp
+    nhwc_test
+    arc_test.cpp
+    lru_test.cpp
+    two_queue_test.cpp
+    lfu_test.cpp
 )
 
 target_link_libraries(
-    nhwc-test
+    nhwc_test
     PRIVATE
     nhwc
     GTest::gtest_main
 )
 
 include(GoogleTest)
-<<<<<<< HEAD
-gtest_discover_tests(nhwc-test)
+gtest_discover_tests(nhwc_test)
