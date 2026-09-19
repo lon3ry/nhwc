@@ -21,6 +21,7 @@ add_executable(
     two_queue_cache_test.cpp
     lfu_cache_test.cpp
     lirs_cache_test.cpp
+    belady_cache_test.cpp
 )
 
 target_link_libraries(

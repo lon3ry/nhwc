@@ -59,15 +59,15 @@ bool LFUCache<T, KeyT>::lookup_update(KeyT key, std::function<T(KeyT)> slow_get_
     }
     else
     {
-        auto page = slow_get_page(key);
-        Record rec { .key = key, .page = page, .freq = 1 };
-
         if (is_full())
         {
             auto evicted_node = freq_to_list_map_[min_freq_].back();
             cache_map_.erase(evicted_node.key);
             freq_to_list_map_[min_freq_].pop_back();
         }
+
+        auto page = slow_get_page(key);
+        Record rec { .key = key, .page = page, .freq = 1 };
 
         min_freq_ = 1;
         freq_to_list_map_[min_freq_].push_front(rec);

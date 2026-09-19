@@ -33,6 +33,8 @@ private:
         KeyT key;
         CacheIt data;
         BlockStatus status;
+
+        Record(KeyT k, CacheIt d, BlockStatus s) : key(k), data(d), status(s) {}
     };
     using StackIt = typename std::list<Record>::iterator;
     using QueueIt = typename std::list<Record>::iterator;
