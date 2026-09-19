@@ -10,6 +10,7 @@
 #include "arc_cache.hpp"
 #include "lru_cache.hpp"
 #include "lfu_cache.hpp"
+#include "lirs_cache.hpp"
 #include "two_queue_cache.hpp"
 
 namespace caches
@@ -20,7 +21,8 @@ enum class CacheType
     ARC,
     TWO_QUEUE,
     LRU,
-    LFU
+    LFU,
+    LIRS
 };
 
 struct CacheLevel
@@ -49,25 +51,20 @@ MultiLevelCache<T, KeyT>::MultiLevelCache(std::list<CacheLevel> levels)
         switch (level.type)
         {
             case CacheType::ARC:
-            {
                 cache_.emplace_back(std::make_unique<ARCCache<T, KeyT>>(level.capacity));
                 break;
-            }
             case CacheType::TWO_QUEUE:
-            {
                 cache_.emplace_back(std::make_unique<TwoQueueCache<T, KeyT>>(level.capacity));
                 break;
-            }
             case CacheType::LRU:
-            {
                 cache_.emplace_back(std::make_unique<LRUCache<T, KeyT>>(level.capacity));
                 break;
-            }
             case CacheType::LFU:
-            {
                 cache_.emplace_back(std::make_unique<LFUCache<T, KeyT>>(level.capacity));
                 break;
-            }
+            case CacheType::LIRS:
+                cache_.emplace_back(std::make_unique<LIRSCache<T, KeyT>>(level.capacity));
+                break;
         }
     }
 }

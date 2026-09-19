@@ -7,10 +7,12 @@
 #include <list>
 #include <unordered_map>
 
+#include "base_cache.hpp"
+
 namespace caches
 {
 
-template <typename T, typename KeyT = int> class LIRSCache
+template <typename T, typename KeyT = int> class LIRSCache : public BaseCache<T, KeyT>
 {
 public:
     explicit LIRSCache(std::size_t capacity) :
