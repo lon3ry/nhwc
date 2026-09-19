@@ -3,6 +3,7 @@
 #include <functional>
 #include <list>
 #include <cstddef>
+#include <memory>
 
 #include "base_cache.hpp"
 #include "arc_cache.hpp"
