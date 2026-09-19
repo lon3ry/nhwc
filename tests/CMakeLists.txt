@@ -20,6 +20,7 @@ add_executable(
     lru_cache_test.cpp
     two_queue_cache_test.cpp
     lfu_cache_test.cpp
+    lirs_cache_test.cpp
 )
 
 target_link_libraries(
