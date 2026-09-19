@@ -30,6 +30,8 @@ TEST(LFUCacheTest, CacheHitsTest)
 
     for (auto test : test_cases)
     {
+        SCOPED_TRACE("test vector: " + ::testing::PrintToString(test.values));
+
         LFUCache<int, int> cache(test.cache_size);
         int hits = 0;
         for (auto v : test.values)

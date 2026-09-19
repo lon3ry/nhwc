@@ -47,6 +47,8 @@ TEST(ARCCacheTest, CacheHitsTest)
 
     for (auto test : test_cases)
     {
+        SCOPED_TRACE("test vector: " + ::testing::PrintToString(test.values));
+
         caches::ARCCache<int, int> cache(test.cache_size);
         int hits = 0;
         for (auto v : test.values)
@@ -55,6 +57,7 @@ TEST(ARCCacheTest, CacheHitsTest)
             if (hit)
                 hits++;
         }
+
         EXPECT_EQ(hits, test.hits);
     }
 }
