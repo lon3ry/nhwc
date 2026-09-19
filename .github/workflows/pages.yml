@@ -11,11 +11,6 @@ permissions:
   id-token: write
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-    with:
-      os: ubuntu-latest
-
   deploy:
     runs-on: ubuntu-latest
 
