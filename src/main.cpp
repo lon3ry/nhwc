@@ -7,12 +7,12 @@ using PageId = int;
 
 int main()
 {
-    int cache_size, data_len;
+    int cache_size, data_len; // std::size_t cache_size instead of int
 
     // TODO: add input check
     std::cin >> cache_size >> data_len;
 
-    caches::TwoQueueCache<Page, PageId> cache{static_cast<std::size_t>(cache_size)};
+    caches::TwoQueueCache<Page, PageId> cache{static_cast<std::size_t>(cache_size)}; // why cast?
     auto load = [](PageId key) { return key; };
 
     int hits = 0;

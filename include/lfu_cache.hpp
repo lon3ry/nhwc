@@ -30,7 +30,7 @@ private:
 
     using NodeIt = typename std::list<Record>::iterator;
     std::unordered_map<KeyT, NodeIt> cache_map_;
-    std::unordered_map<KeyT, std::list<Record>> freq_to_list_map_;
+    std::unordered_map<unsigned int, std::list<Record>> freq_to_list_map_;
 };
 
 
