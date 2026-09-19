@@ -23,7 +23,7 @@ jobs:
       - name: Download a build
         uses: actions/download-artifact@v6
         with:
-          name: ubuntu-latest-build
+          name: ubuntu-latest-clang++-build
 
       - name: Install UV
         run: |
