@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "two_queue.hpp"
+#include "two_queue_cache.hpp"
 
 TEST(TwoQueueCacheTest, CacheHitsTest)
 {

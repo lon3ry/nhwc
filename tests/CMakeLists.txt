@@ -16,10 +16,10 @@ enable_testing()
 
 add_executable(
     nhwc_test
-    arc_test.cpp
-    lru_test.cpp
-    two_queue_test.cpp
-    lfu_test.cpp
+    arc_cache_test.cpp
+    lru_cache_test.cpp
+    two_queue_cache_test.cpp
+    lfu_cache_test.cpp
 )
 
 target_link_libraries(
