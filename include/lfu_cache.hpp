@@ -5,9 +5,12 @@
 #include <list>
 #include <functional>
 
+#include "base_cache.hpp"
 
-template <typename T, typename KeyT>
-class LFUCache
+namespace caches
+{
+
+template <typename T, typename KeyT> class LFUCache : public BaseCache<T, KeyT>
 {
 public:
     LFUCache(std::size_t capacity) : capacity_(capacity), min_freq_(1) {}
@@ -15,7 +18,7 @@ public:
     std::size_t max_capacity() const { return capacity_; }
     bool is_full() const { return (capacity_ == cache_map_.size()); }
 
-    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page);
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page) override;
 
 private:
     const std::size_t capacity_;
@@ -73,3 +76,5 @@ bool LFUCache<T, KeyT>::lookup_update(KeyT key, std::function<T(KeyT)> slow_get_
         return false;
     }
 }
+
+} // namespace caches

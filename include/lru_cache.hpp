@@ -5,16 +5,18 @@
 #include <cstddef>
 #include <functional>
 
+#include "base_cache.hpp"
+
 namespace caches
 {
 
-template <typename T, typename KeyT = int> class LRUCache
+template <typename T, typename KeyT = int> class LRUCache : public BaseCache<T, KeyT>
 {
 public:
     explicit LRUCache(std::size_t size) : size_(size) {}
     std::size_t max_capacity() const { return size_; }
 
-    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page);
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page) override;
 
 private:
     const std::size_t size_;

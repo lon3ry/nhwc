@@ -3,13 +3,14 @@
 #include <cstddef>
 #include <functional>
 
+#include "base_cache.hpp"
 #include "lru_queue.hpp"
 #include "ghost_lru_queue.hpp"
 
 namespace caches
 {
 
-template <typename T, typename KeyT = int> class TwoQueueCache
+template <typename T, typename KeyT = int> class TwoQueueCache : public BaseCache<T, KeyT>
 {
 public:
     explicit TwoQueueCache(std::size_t capacity) :
@@ -18,7 +19,7 @@ public:
         kout_((capacity + 1) / 2)
     {};
 
-    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page);
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page) override;
 
 private:
     std::size_t capacity_, kin_, kout_;

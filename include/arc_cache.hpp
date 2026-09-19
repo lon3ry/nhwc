@@ -4,17 +4,18 @@
 #include <cstddef>
 #include <functional>
 
+#include "base_cache.hpp"
 #include "lru_queue.hpp"
 #include "ghost_lru_queue.hpp"
 
 namespace caches
 {
 
-template <typename T, typename KeyT = int> class ARCCache
+template <typename T, typename KeyT = int> class ARCCache : public BaseCache<T, KeyT>
 {
 public:
     explicit ARCCache(std::size_t capacity) : capacity_(capacity) {}
-    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page);
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page) override;
 
 private:
     const std::size_t capacity_;
@@ -48,7 +49,7 @@ bool ARCCache<T, KeyT>::lookup_update(KeyT key, std::function<T(KeyT)> slow_get_
     if (hit_evicted_recents)
     {
         std::size_t delta1 = evicted_recents_.size() >= evicted_frequenters_.size() ? 1 :
-                                evicted_frequenters_.size() / evicted_recents_.size();
+                             evicted_frequenters_.size() / evicted_recents_.size();
         p_ = std::min(p_ + delta1, capacity_);
 
         replace(key);
@@ -64,7 +65,7 @@ bool ARCCache<T, KeyT>::lookup_update(KeyT key, std::function<T(KeyT)> slow_get_
     if (hit_evicted_frequenters)
     {
         std::size_t delta2 = evicted_frequenters_.size() >= evicted_recents_.size() ? 1 :
-                                evicted_recents_.size() / evicted_frequenters_.size();
+                             evicted_recents_.size() / evicted_frequenters_.size();
         // p_ = std::max<long long>(p_ - delta2, 0);
         p_ = (p_ > delta2) ? (p_ - delta2) : 0;
 
