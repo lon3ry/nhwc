@@ -52,5 +52,5 @@ jobs:
 
     - uses: actions/upload-artifact@v6
       with:
-        name: ${{ matrix.os }}-${{ matrix.compiler }}-build
+        name: ${{ matrix.os }}-${{ matrix.cpp_compiler }}-build
         path: build
