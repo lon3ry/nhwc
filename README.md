@@ -41,7 +41,7 @@ Following algorithms are supported:
 
 The program accepts size of cache levels, then data set size and a sequence of requests. For example:
 ```shell
-echo '2 ARC 2Q' > config.txt
+echo 2 ARC 2Q > config.txt
 echo 2 4 6 1 2 1 2 1 2 | ./build/main
 ```
 In this case we have a two-level cache with ARC cache (size 2) and 2Q (size 4) and a sequence with 6 requests.
@@ -67,10 +67,10 @@ uv run main.py
 
 - Theodore Johnson and Dennis E. Shasha. "[2Q: A Low Overhead High Performance Buffer Management Replacement Algorithm](https://dl.acm.org/doi/10.5555/645920.672996)." In *Proceedings of the 20th International Conference on Very Large Data Bases (VLDB '94)*, Santiago de Chile, Chile, 1994, pp. 439–450.
 
-- Song Jiang and Xiaodong (Frank) Zhang. "[LIRS: An Efficient Low Inter-Reference Recency Set Replacement Policy to Improve Buffer Cache Performance](https://dl.acm.org/doi/10.1145/511399.511340)." *ACM SIGMETRICS Performance Evaluation Review*, vol. 30, pp. 31–42, 2002.
+- Song Jiang and Xiaodong (Frank) Zhang. "[LIRS: An Efficient Low Inter-Reference Recency Set Replacement Policy to Improve Buffer Cache Performance](https://dl.acm.org/doi/10.1145/511399.511340)." In *ACM SIGMETRICS Performance Evaluation Review*, 2002, vol. 30, pp. 31–42.
 
-- Song Jiang and Xiaodong Zhang. "[Making LRU Friendly to Weak Locality Workloads: A Novel Replacement Algorithm to Improve Buffer Cache Performance](https://www.computer.org/csdl/journal/tc/2005/08/t0939/13rRUy3xY7k)." In IEEE Transactions on Computers, vol. 54, no. 8, pp. 939-952, 2005.
+- Song Jiang and Xiaodong Zhang. "[Making LRU Friendly to Weak Locality Workloads: A Novel Replacement Algorithm to Improve Buffer Cache Performance](https://www.computer.org/csdl/journal/tc/2005/08/t0939/13rRUy3xY7k)." In *IEEE Transactions on Computers*, 2005, vol. 54, no. 8, pp. 939-952.
 
-- Arjun Singh Saud. "[Survey Inter-Reference Recency Based Page Replacement Policies to Cope with Weak Locality Workloads](https://www.nepjol.info/index.php/kjem/article/view/22017)." In Kathford Journal of Engineering and Management, vol. 1, no. 1, pp. 23-26, 2018.
+- Arjun Singh Saud. "[Survey Inter-Reference Recency Based Page Replacement Policies to Cope with Weak Locality Workloads](https://www.nepjol.info/index.php/kjem/article/view/22017)." In *Kathford Journal of Engineering and Management*, 2018, vol. 1, no. 1, pp. 23-26.
 
-- L. A. Belady and F. P. Palermo. "[On-Line Measurement of Paging Behavior by the Multivalued MIN Algorithm](https://ieeexplore.ieee.org/document/5391336)." In IBM Journal of Research and Development, vol. 18, no. 1, pp. 2–19, 1974.
+- L. A. Belady and F. P. Palermo. "[On-Line Measurement of Paging Behavior by the Multivalued MIN Algorithm](https://ieeexplore.ieee.org/document/5391336)." In *IBM Journal of Research and Development*, 1974, vol. 18, no. 1, pp. 2–19.
