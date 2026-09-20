@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <list>
 #include <vector>
-#include <functional>
-#include <algorithm>
 
+namespace caches
+{
 
 template <typename T, typename KeyT>
 class BeladyCache
@@ -94,3 +94,5 @@ typename BeladyCache<T, KeyT>::NodeIt BeladyCache<T, KeyT>::find_free_space(
 
     return candidate_it;
 }
+
+} // namespace caches

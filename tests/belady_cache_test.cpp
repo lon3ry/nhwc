@@ -44,7 +44,7 @@ TEST(BeladyCacheTest, CacheHitsTest)
     {
         SCOPED_TRACE("test vector: " + ::testing::PrintToString(test.values));
 
-        BeladyCache<int, int> cache(test.cache_size);
+        caches::BeladyCache<int, int> cache(test.cache_size);
         int hits = static_cast<int>(cache.calculate_hits(test.values));
 
         EXPECT_EQ(hits, test.hits);
