@@ -1,6 +1,11 @@
 name: Benchmarks Pages
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'bench/**'
   workflow_run:
     workflows:
       - CMake on multiple platforms
