@@ -60,6 +60,7 @@ This project includes various benchmarks. To run them, install [uv](https://docs
 cd bench
 uv run main.py
 ```
+These benchmarks also run automatically, you can check the latest results [here](https://lon3ry.github.io/nhwc).
 
 ## References
 
