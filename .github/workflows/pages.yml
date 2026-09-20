@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +24,7 @@ jobs:
       - name: Download a build
         uses: actions/download-artifact@v5
         with:
+          run-id: ${{ github.event.workflow_run.id }}
           name: ubuntu-latest-clang++-build
 
       - name: Install UV
@@ -31,12 +33,12 @@ jobs:
 
       - name: Run benchmarks
         run: |
-          cd {{ github.workspace }}/bench
+          cd ${{ github.workspace }}/bench
           uv run main.py
 
       - name: Generate HTML
         run: |
-          cd {{ github.workspace }}
+          cd ${{ github.workspace }}
           mkdir -p public
 
           cat > public/index.html <<'EOF'
