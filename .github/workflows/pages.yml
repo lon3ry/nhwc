@@ -96,7 +96,7 @@ jobs:
             </style>
           </head>
           <body>
-            <h1>HWC benchmarks</h1>
+            <h1>NHWC benchmarks</h1>
             <div class="gallery">
           EOF
 
