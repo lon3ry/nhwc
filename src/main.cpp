@@ -2,13 +2,11 @@
 
 #include "multi_level_cache.hpp"
 #include "config.hpp"
+#include "util.hpp"
 
 using namespace caches;
 using Page = long long;
 using PageId = long long;
-
-bool read_integer(long long& value);
-bool can_be_valid_size_t(long long value);
 
 int main()
 {
@@ -17,7 +15,7 @@ int main()
     {
         long long n;
         auto read_ok = read_integer(n);
-        if (!read_ok || can_be_valid_size_t(n))
+        if (!read_ok || can_not_be_valid_size_t(n))
         {
             std::cerr << "Expected nonnegative cache size.\n";
             return 1;
@@ -29,7 +27,7 @@ int main()
 
     long long data_len;
     auto read_ok = read_integer(data_len);
-    if (!read_ok || can_be_valid_size_t(data_len))
+    if (!read_ok || can_not_be_valid_size_t(data_len))
     {
         std::cerr << "Expected nonnegative cache size.\n";
         return 1;
@@ -43,7 +41,7 @@ int main()
         PageId key;
 
         auto read_ok = read_integer(key);
-        if (!read_ok || can_be_valid_size_t(key))
+        if (!read_ok || can_not_be_valid_size_t(key))
         {
             std::cerr << "Expected nonnegative page key.\n";
             return 1;
@@ -54,20 +52,4 @@ int main()
             ++hits;
     }
     std::cout << hits << std::endl;
-}
-
-bool read_integer(long long& value)
-{
-    if (!(std::cin >> value))
-        return false;
-    // Reject tokens such as "12x"; reaching EOF after a number is valid.
-    const auto next = std::cin.peek();
-    return !std::cin.bad() && (next == std::char_traits<char>::eof() ||
-           std::isspace(static_cast<unsigned char>(next)));
-}
-
-bool can_be_valid_size_t(long long value)
-{
-    return value < 0 ||
-           static_cast<unsigned long long>(value) > std::numeric_limits<std::size_t>::max();
 }
