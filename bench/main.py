@@ -11,12 +11,11 @@ import numpy as np
 import subprocess
 from pathlib import Path
 import sys
-import os
 from itertools import permutations
 
 plt.rcParams['axes.prop_cycle'] = (
-    plt.cycler(color=plt.rcParams['axes.prop_cycle'].by_key()['color'])
-    * plt.cycler(linestyle=['-', '--', '-.', ':'])
+    plt.cycler(color=plt.rcParams['axes.prop_cycle'].by_key()['color']) *
+    plt.cycler(linestyle=['-', '--', '-.', ':'])
 )
 
 OUTPUT_DIRECTORY = "res"
@@ -89,7 +88,7 @@ for file in directory.iterdir():
     if not file.is_file():
         continue
 
-    fig, ax = plt.subplots(figsize=(15, 10), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(18, 14), constrained_layout=True)
     ax.set_xlabel("Cache Size")
     ax.set_ylabel("Hit Ratio (%)")
     ax.minorticks_on()
@@ -98,7 +97,7 @@ for file in directory.iterdir():
 
     with open(file) as f:
         n = int(f.readline())
-        ax.set_title(f"{file.name} ({n} requests)")
+        ax.set_title(f"{file.name} ({n} requests, same cache size for each level)")
 
         values = [int(f.readline()) for i in range(n)]
 
