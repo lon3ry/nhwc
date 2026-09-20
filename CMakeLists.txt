@@ -4,10 +4,10 @@ project("nhwc")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(main
-    src/main.cpp
-    src/config.cpp
-    src/util.cpp
-    src/multi_level_cache.cpp
+    source/main.cpp
+    source/config.cpp
+    source/util.cpp
+    source/multi_level_cache.cpp
 )
 set_target_properties(main PROPERTIES
     CXX_STANDARD 20
@@ -15,8 +15,8 @@ set_target_properties(main PROPERTIES
 )
 
 add_executable(ideal_cache
-    src/ideal_cache.cpp
-    src/util.cpp
+    source/ideal_cache.cpp
+    source/util.cpp
 )
 set_target_properties(ideal_cache PROPERTIES
     CXX_STANDARD 20
