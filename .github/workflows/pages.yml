@@ -101,7 +101,7 @@ jobs:
           EOF
 
           find bench -type f -iname '*.png' |
-          sort |
+          sort -V |
           while read -r image; do
             filename=$(basename "$image")
 
