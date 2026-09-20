@@ -16,6 +16,8 @@ CacheType string_to_cache_type(const std::string_view str)
         return CacheType::TWO_QUEUE;
     if (str == "LFU")
         return CacheType::LFU;
+    if (str == "LIRS")
+        return CacheType::LIRS;
     throw std::invalid_argument("unknown cache type: " + std::string(str));
 }
 
