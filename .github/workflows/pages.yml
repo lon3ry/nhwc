@@ -41,6 +41,7 @@ jobs:
 
       - name: Make executables executable
         run: |
+          chmod +x build/main
           chmod +x build/ideal_cache
 
       - name: Install uv
