@@ -8,73 +8,92 @@
 namespace caches
 {
 
-template <typename T, typename KeyT = int> class LRUQueue
+template <typename T, typename KeyT = int, typename QueueItemT = KeyT> class BaseLRUQueue
 {
+protected:
+    std::list<QueueItemT> cache_;
+
+    using QueueIt = typename std::list<QueueItemT>::iterator;
+    std::unordered_map<KeyT, QueueIt> hash_;
+
+    virtual KeyT get_key(QueueItemT& item) = 0;
+
 public:
     std::size_t size() const { return cache_.size(); }
+
     bool empty() const { return size() == 0; }
     bool has(KeyT key) const { return hash_.find(key) != hash_.end(); }
 
-    bool lookup(KeyT key);
-    void insert(KeyT key, T page);
+    bool lookup(KeyT key)
+    {
+        auto hit = hash_.find(key);
+        if (hit != hash_.end())
+        {
+            auto eltit = hit->second;
+            cache_.splice(cache_.begin(), cache_, eltit);
+            return true;
+        }
+        return false;
+    }
 
-    using QueueItem = typename std::pair<KeyT, T>;
-    std::optional<QueueItem> pop_most_recently_used();
-    std::optional<QueueItem> pop_last_recently_used();
+    void insert(QueueItemT item)
+    {
+        cache_.emplace_front(item);
+        hash_.emplace(get_key(item), cache_.begin());
+    }
 
-private:
-    // Each entry is {key, page}; most recently used entry is at the front.
-    std::list<std::pair<KeyT, T>> cache_;
+    std::optional<QueueItemT> pop_most_recently_used()
+    {
+        if (empty())
+            return std::nullopt;
 
-    using QueueIt = typename std::list<QueueItem>::iterator;
-    std::unordered_map<KeyT, QueueIt> hash_;
+        hash_.erase(get_key(cache_.front()));
+        auto item = cache_.front();
+        cache_.pop_front();
 
+        return item;
+    }
+
+    std::optional<QueueItemT> pop_last_recently_used()
+    {
+        if (empty())
+            return std::nullopt;
+
+        hash_.erase(get_key(cache_.back()));
+        auto item = cache_.back();
+        cache_.pop_back();
+
+        return item;
+    }
+
+    void erase(KeyT key)
+    {
+        auto hit = hash_.find(key);
+        if (hit == hash_.end())
+            return;
+        auto eltit = hit->second;
+        cache_.erase(eltit);
+        hash_.erase(hit);
+    }
 };
 
-template <typename T, typename KeyT>
-bool LRUQueue<T, KeyT>::lookup(KeyT key)
+template <typename T, typename KeyT = int>
+struct LRUQueueItem
 {
-    auto hit = hash_.find(key);
-    if (hit != hash_.end())
-    {
-        auto eltit = hit->second;
-        cache_.splice(cache_.begin(), cache_, eltit);
-        return true;
-    }
-    return false;
-}
+    KeyT key;
+    T page;
+};
 
-template <typename T, typename KeyT>
-void LRUQueue<T, KeyT>::insert(KeyT key, T page)
+template <typename T, typename KeyT = int>
+class LRUQueue : public BaseLRUQueue<T, KeyT, LRUQueueItem<T, KeyT>>
 {
-    cache_.emplace_front(key, page);
-    hash_.emplace(key, cache_.begin());
-}
+    using QueueItem = LRUQueueItem<T, KeyT>;
+    KeyT get_key(QueueItem& item) { return item.key; }
+};
 
-template <typename T, typename KeyT>
-std::optional<typename LRUQueue<T, KeyT>::QueueItem> LRUQueue<T, KeyT>::pop_most_recently_used()
+template <typename KeyT = int> class GhostLRUQueue : public BaseLRUQueue<KeyT, KeyT, KeyT>
 {
-    if (empty())
-        return std::nullopt;
-
-    hash_.erase(cache_.front().first);
-    auto item = cache_.front();
-    cache_.pop_front();
-
-    return item;
-}
-
-template <typename T, typename KeyT>
-std::optional<typename LRUQueue<T, KeyT>::QueueItem> LRUQueue<T, KeyT>::pop_last_recently_used()
-{
-    if (empty())
-        return std::nullopt;
-
-    hash_.erase(cache_.back().first);
-    auto item = cache_.back();
-    cache_.pop_back();
-
-    return item;
-}
+    KeyT get_key(KeyT& item) { return item; }
+};
 
 } // namespace caches

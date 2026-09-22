@@ -11,8 +11,8 @@ using PageId = long long;
 int main()
 {
     long long cache_size, data_len;
-    if (!read_integer(cache_size) || !read_integer(data_len)
-        || can_not_be_valid_size_t(cache_size) || can_not_be_valid_size_t(data_len))
+    if (!read_integer(cache_size) || !read_integer(data_len) || can_not_be_valid_size_t(cache_size)
+        || can_not_be_valid_size_t(data_len))
     {
         std::cerr << "Expected nonnegative cache and data size.\n";
         return 1;
