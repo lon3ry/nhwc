@@ -8,21 +8,19 @@
 namespace caches
 {
 
-template <typename T, typename KeyT = int> class LRUQueue
+template <typename T, typename KeyT = int, typename QueueItemT = KeyT> class BaseLRUQueue
 {
-    struct QueueItem
-    {
-        KeyT key;
-        T page;
-    };
+protected:
+    std::list<QueueItemT> cache_;
 
-    std::list<QueueItem> cache_;
-
-    using QueueIt = typename std::list<QueueItem>::iterator;
+    using QueueIt = typename std::list<QueueItemT>::iterator;
     std::unordered_map<KeyT, QueueIt> hash_;
+
+    virtual KeyT get_key(QueueItemT& item) = 0;
 
 public:
     std::size_t size() const { return cache_.size(); }
+
     bool empty() const { return size() == 0; }
     bool has(KeyT key) const { return hash_.find(key) != hash_.end(); }
 
@@ -38,35 +36,64 @@ public:
         return false;
     }
 
-    void insert(KeyT key, T page)
+    void insert(QueueItemT item)
     {
-        cache_.emplace_front(key, page);
-        hash_.emplace(key, cache_.begin());
+        cache_.emplace_front(item);
+        hash_.emplace(get_key(item), cache_.begin());
     }
 
-    std::optional<QueueItem> pop_most_recently_used()
+    std::optional<QueueItemT> pop_most_recently_used()
     {
         if (empty())
             return std::nullopt;
 
-        hash_.erase(cache_.front().key);
+        hash_.erase(get_key(cache_.front()));
         auto item = cache_.front();
         cache_.pop_front();
 
         return item;
     }
 
-    std::optional<QueueItem> pop_last_recently_used()
+    std::optional<QueueItemT> pop_last_recently_used()
     {
         if (empty())
             return std::nullopt;
 
-        hash_.erase(cache_.back().key);
+        hash_.erase(get_key(cache_.back()));
         auto item = cache_.back();
         cache_.pop_back();
 
         return item;
     }
+
+    void erase(KeyT key)
+    {
+        auto hit = hash_.find(key);
+        if (hit == hash_.end())
+            return;
+        auto eltit = hit->second;
+        cache_.erase(eltit);
+        hash_.erase(hit);
+    }
+};
+
+template <typename T, typename KeyT = int>
+struct LRUQueueItem
+{
+    KeyT key;
+    T page;
+};
+
+template <typename T, typename KeyT = int>
+class LRUQueue : public BaseLRUQueue<T, KeyT, LRUQueueItem<T, KeyT>>
+{
+    using QueueItem = LRUQueueItem<T, KeyT>;
+    KeyT get_key(QueueItem& item) { return item.key; }
+};
+
+template <typename KeyT = int> class GhostLRUQueue : public BaseLRUQueue<KeyT, KeyT, KeyT>
+{
+    KeyT get_key(KeyT& item) { return item; }
 };
 
 } // namespace caches

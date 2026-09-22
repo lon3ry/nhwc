@@ -6,7 +6,6 @@
 
 #include "base_cache.hpp"
 #include "lru_queue.hpp"
-#include "ghost_lru_queue.hpp"
 
 namespace caches
 {
@@ -46,7 +45,7 @@ public:
         if (hit_recents)
         {
             auto item = recents_.pop_most_recently_used();
-            frequenters_.insert(item->key, item->page);
+            frequenters_.insert({ item->key, item->page });
             return true;
         }
 
@@ -65,7 +64,7 @@ public:
             evicted_recents_.erase(key);
 
             auto page = slow_get_page(key);
-            frequenters_.insert(key, page);
+            frequenters_.insert({ key, page });
 
             return false;
         }
@@ -82,7 +81,7 @@ public:
             evicted_frequenters_.erase(key);
 
             auto page = slow_get_page(key);
-            frequenters_.insert(key, page);
+            frequenters_.insert({ key, page });
 
             return false;
         }
@@ -113,7 +112,7 @@ public:
         }
 
         auto page = slow_get_page(key);
-        recents_.insert(key, page);
+        recents_.insert({ key, page });
 
         return false;
     }

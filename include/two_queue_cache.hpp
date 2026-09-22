@@ -5,7 +5,6 @@
 
 #include "base_cache.hpp"
 #include "lru_queue.hpp"
-#include "ghost_lru_queue.hpp"
 
 namespace caches
 {
@@ -59,7 +58,7 @@ public:
             a1_out_.erase(key);
             reclaim_for();
             T page = slow_get_page(key);
-            am_.insert(key, page);
+            am_.insert({ key, page });
             return false;
         }
 
@@ -70,7 +69,7 @@ public:
         reclaim_for();
 
         T page = slow_get_page(key);
-        a1_in_.insert(key, page);
+        a1_in_.insert({ key, page });
 
         return false;
     }
