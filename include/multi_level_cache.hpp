@@ -4,7 +4,6 @@
 #include <list>
 #include <cstddef>
 #include <memory>
-#include <limits>
 
 #include "base_cache.hpp"
 #include "arc_cache.hpp"
