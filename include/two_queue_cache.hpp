@@ -30,7 +30,7 @@ template <typename T, typename KeyT = int> class TwoQueueCache : public BaseCach
         else if (a1_in_above_threshold())
         {
             auto item = a1_in_.pop_last_recently_used();
-            a1_out_.insert(item->first);
+            a1_out_.insert(item->key);
             if (a1_out_above_threshold())
                 a1_out_.pop_last_recently_used();
         }

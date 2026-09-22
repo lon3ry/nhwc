@@ -10,10 +10,14 @@ namespace caches
 
 template <typename T, typename KeyT = int> class LRUQueue
 {
-    // Each entry is {key, page}; most recently used entry is at the front.
-    std::list<std::pair<KeyT, T>> cache_;
+    struct QueueItem
+    {
+        KeyT key;
+        T page;
+    };
 
-    using QueueItem = typename std::pair<KeyT, T>;
+    std::list<QueueItem> cache_;
+
     using QueueIt = typename std::list<QueueItem>::iterator;
     std::unordered_map<KeyT, QueueIt> hash_;
 
@@ -45,7 +49,7 @@ public:
         if (empty())
             return std::nullopt;
 
-        hash_.erase(cache_.front().first);
+        hash_.erase(cache_.front().key);
         auto item = cache_.front();
         cache_.pop_front();
 
@@ -57,7 +61,7 @@ public:
         if (empty())
             return std::nullopt;
 
-        hash_.erase(cache_.back().first);
+        hash_.erase(cache_.back().key);
         auto item = cache_.back();
         cache_.pop_back();
 

@@ -28,12 +28,12 @@ template <typename T, typename KeyT = int> class ARCCache : public BaseCache<T, 
             p_ == recents_.size())))
         {
             auto victim = recents_.pop_last_recently_used();
-            evicted_recents_.insert(victim->first);
+            evicted_recents_.insert(victim->key);
         }
         else
         {
             auto victim = frequenters_.pop_last_recently_used();
-            evicted_frequenters_.insert(victim->first);
+            evicted_frequenters_.insert(victim->key);
         }
     }
 
@@ -46,7 +46,7 @@ public:
         if (hit_recents)
         {
             auto item = recents_.pop_most_recently_used();
-            frequenters_.insert(item->first, item->second);
+            frequenters_.insert(item->key, item->page);
             return true;
         }
 
