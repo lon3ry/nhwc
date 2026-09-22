@@ -18,7 +18,7 @@ public:
     std::size_t max_capacity() const { return capacity_; }
     bool is_full() const { return (capacity_ == cache_map_.size()); }
 
-    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page) override;
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page);
 
 private:
     const std::size_t capacity_;

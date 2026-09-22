@@ -40,7 +40,7 @@ template <typename T, typename KeyT = int> class ARCCache : public BaseCache<T, 
 public:
     explicit ARCCache(std::size_t capacity) : capacity_(capacity) {}
 
-    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page) override
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
         bool hit_recents = recents_.lookup(key);
         if (hit_recents)

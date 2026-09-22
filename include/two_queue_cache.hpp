@@ -47,7 +47,7 @@ public:
         kout_((capacity + 1) / 2) // same for kout_
     {};
 
-    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page) override
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
         auto hit_am = am_.lookup(key);
         if (hit_am)
