@@ -114,6 +114,7 @@ public:
         capacity_(capacity),
         lirs_max_(capacity - std::max<std::size_t>(1, capacity / 100))
     {}
+
     bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
         auto hit_stack = hash_stack_.find(key);
