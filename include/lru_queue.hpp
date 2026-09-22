@@ -8,7 +8,7 @@
 namespace caches
 {
 
-template <typename T, typename KeyT = int, typename QueueItemT = KeyT> class BaseLRUQueue
+template <typename KeyT = int, typename QueueItemT = KeyT> class BaseLRUQueue
 {
 protected:
     std::list<QueueItemT> cache_;
@@ -85,13 +85,13 @@ struct LRUQueueItem
 };
 
 template <typename T, typename KeyT = int>
-class LRUQueue : public BaseLRUQueue<T, KeyT, LRUQueueItem<T, KeyT>>
+class LRUQueue : public BaseLRUQueue<KeyT, LRUQueueItem<T, KeyT>>
 {
     using QueueItem = LRUQueueItem<T, KeyT>;
     KeyT get_key(QueueItem& item) { return item.key; }
 };
 
-template <typename KeyT = int> class GhostLRUQueue : public BaseLRUQueue<KeyT, KeyT, KeyT>
+template <typename KeyT = int> class GhostLRUQueue : public BaseLRUQueue<KeyT, KeyT>
 {
     KeyT get_key(KeyT& item) { return item; }
 };
