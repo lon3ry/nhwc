@@ -35,54 +35,48 @@ CacheType string_to_cache_type(const std::string_view str);
 
 template <typename T, typename KeyT = int> class MultiLevelCache
 {
-private:
     std::list<std::unique_ptr<BaseCache<T, KeyT>>> cache_;
 
 public:
-    MultiLevelCache(std::list<CacheLevel> levels);
-    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page);
-};
-
-template <typename T, typename KeyT>
-MultiLevelCache<T, KeyT>::MultiLevelCache(std::list<CacheLevel> levels)
-{
-    for (auto level : levels)
+    MultiLevelCache(std::list<CacheLevel> levels)
     {
-        switch (level.type)
+        for (auto level : levels)
         {
-            case CacheType::ARC:
-                cache_.emplace_back(std::make_unique<ARCCache<T, KeyT>>(level.capacity));
-                break;
-            case CacheType::TWO_QUEUE:
-                cache_.emplace_back(std::make_unique<TwoQueueCache<T, KeyT>>(level.capacity));
-                break;
-            case CacheType::LRU:
-                cache_.emplace_back(std::make_unique<LRUCache<T, KeyT>>(level.capacity));
-                break;
-            case CacheType::LFU:
-                cache_.emplace_back(std::make_unique<LFUCache<T, KeyT>>(level.capacity));
-                break;
-            case CacheType::LIRS:
-                cache_.emplace_back(std::make_unique<LIRSCache<T, KeyT>>(level.capacity));
-                break;
+            switch (level.type)
+            {
+                case CacheType::ARC:
+                    cache_.emplace_back(std::make_unique<ARCCache<T, KeyT>>(level.capacity));
+                    break;
+                case CacheType::TWO_QUEUE:
+                    cache_.emplace_back(std::make_unique<TwoQueueCache<T, KeyT>>(level.capacity));
+                    break;
+                case CacheType::LRU:
+                    cache_.emplace_back(std::make_unique<LRUCache<T, KeyT>>(level.capacity));
+                    break;
+                case CacheType::LFU:
+                    cache_.emplace_back(std::make_unique<LFUCache<T, KeyT>>(level.capacity));
+                    break;
+                case CacheType::LIRS:
+                    cache_.emplace_back(std::make_unique<LIRSCache<T, KeyT>>(level.capacity));
+                    break;
+            }
         }
     }
-}
 
-template <typename T, typename KeyT>
-bool MultiLevelCache<T, KeyT>::lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
-{
-    for (const auto& level : cache_)
+    bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
-        // TODO: Here is a high perfomance issue, because we call slow_get_page() for each level that
-        // misses it before we meet a level which doesn't. It's pointeless, since we can get it once
-        // and then copy it forward to each next level. Still, it doesn't affect cache hit ratio, so
-        // we can test everything even with this flaw implementation
-        auto hit = level->lookup_update(key, slow_get_page);
-        if (hit)
-            return true;
+        for (const auto& level : cache_)
+        {
+            // TODO: Here is a high perfomance issue, because we call slow_get_page() for each level
+            // that misses it before we meet a level which doesn't. It's pointeless, since we can
+            // get it once and then copy it forward to each next level. Still, it doesn't affect
+            // cache hit ratio, so we can test everything even with this flaw implementation
+            auto hit = level->lookup_update(key, slow_get_page);
+            if (hit)
+                return true;
+        }
+        return false;
     }
-    return false;
-}
+};
 
 } // namespace caches
