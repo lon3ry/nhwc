@@ -75,6 +75,8 @@ public:
         cache_.erase(eltit);
         hash_.erase(hit);
     }
+
+    virtual ~BaseLRUQueue() = default;
 };
 
 template <typename T, typename KeyT = int>
