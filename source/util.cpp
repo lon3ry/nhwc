@@ -1,5 +1,5 @@
 #include <iostream>
-#include <limits.h>
+#include <limits>
 
 #include "util.hpp"
 
