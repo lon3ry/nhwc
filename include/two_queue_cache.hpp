@@ -42,8 +42,8 @@ template <typename T, typename KeyT = int> class TwoQueueCache : public BaseCach
 public:
     explicit TwoQueueCache(std::size_t capacity) :
         capacity_(capacity),
-        kin_((capacity + 3) / 4), // avoid kin_ = 0
-        kout_((capacity + 1) / 2) // same for kout_
+        kin_(capacity / 4),
+        kout_(capacity / 2)
     {};
 
     bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
