@@ -16,114 +16,102 @@ template <typename T, typename KeyT = int> class LIRSCache : public BaseCache<T,
 {
     std::size_t capacity_, lirs_max_;
 
-    std::list<T> cache_;
+    std::list<T> cache_; // resident pages only
 
     enum class BlockStatus { LIR, HIR };
     using CacheIt = typename std::list<T>::iterator;
-    struct Record
+
+    // LIRS stack S: front = top (most recently referenced), back = bottom.
+    struct StackRecord
+    {
+        KeyT key;
+        CacheIt data; // cache_.end() means non-resident
+        BlockStatus status;
+
+        StackRecord(KeyT k, CacheIt d, BlockStatus s) : key(k), data(d), status(s) {}
+    };
+
+    // resident HIR list Q: front = MRU, back = LRU (eviction victim).
+    struct QueueRecord
     {
         KeyT key;
         CacheIt data;
-        BlockStatus status;
 
-        Record(KeyT k, CacheIt d, BlockStatus s) : key(k), data(d), status(s) {}
+        QueueRecord(KeyT k, CacheIt d) : key(k), data(d) {}
     };
-    using StackIt = typename std::list<Record>::iterator;
-    using QueueIt = typename std::list<Record>::iterator;
 
-    std::list<Record> stack_;
-    std::list<Record> queue_;
+    using StackIt = typename std::list<StackRecord>::iterator;
+    using QueueIt = typename std::list<QueueRecord>::iterator;
+
+    std::list<StackRecord> stack_;
+    std::list<QueueRecord> queue_;
     std::unordered_map<KeyT, StackIt> hash_stack_;
     std::unordered_map<KeyT, QueueIt> hash_queue_;
 
     std::size_t lir_count_ = 0;
 
+    // Remove HIR blocks at the bottom until an LIR block sits there.
     void prune_stack()
     {
-        while (!stack_.empty() && stack_.back().status != BlockStatus::LIR)
+        while (!stack_.empty() && stack_.back().status == BlockStatus::HIR)
         {
-            Record bottom = stack_.back();
+            hash_stack_.erase(stack_.back().key);
             stack_.pop_back();
-            hash_stack_.erase(bottom.key);
         }
     }
 
+    // Demote the bottom-most LIR block to HIR and append it to queue Q.
     void demote_lir_bottom()
     {
         if (stack_.empty() || stack_.back().status != BlockStatus::LIR)
             return;
 
-        Record bottom = stack_.back();
+        StackRecord bottom = stack_.back();
         stack_.pop_back();
         hash_stack_.erase(bottom.key);
-
         bottom.status = BlockStatus::HIR;
-        queue_.emplace_front(bottom.key, bottom.data, BlockStatus::HIR);
+        queue_.emplace_front(bottom.key, bottom.data);
         hash_queue_.emplace(bottom.key, queue_.begin());
-
         --lir_count_;
     }
 
-    BlockStatus get_block_status(KeyT key) const
+    bool is_full() const { return lir_count_ + queue_.size() >= capacity_; }
+
+    void evict_lru_hir()
     {
-        auto hit_stack = hash_stack_.find(key);
-        if (hit_stack != hash_stack_.end())
-            return hit_stack->second->status;
-
-        auto hit_queue = hash_queue_.find(key);
-        if (hit_queue != hash_queue_.end())
-            return hit_queue->second->status;
-
-        return BlockStatus::HIR;
-    }
-
-    bool is_hir(KeyT key) const { return get_block_status(key) == BlockStatus::HIR; }
-    bool is_lir(KeyT key) const { return get_block_status(key) == BlockStatus::LIR; }
-    bool is_resident(KeyT key) const
-    {
-        auto hit_stack = hash_stack_.find(key);
-        if (hit_stack != hash_stack_.end())
-            return hit_stack->second->data != cache_.end();
-
-        auto hit_queue = hash_queue_.find(key);
-        if (hit_queue != hash_queue_.end())
-            return hit_queue->second->data != cache_.end();
-
-        return false;
-    }
-
-    bool is_full() const { return cache_.size() >= capacity_; }
-
-    void free_space()
-    {
-        if (!is_full())
+        if (queue_.empty())
             return;
 
-        auto victim = queue_.back();
-        auto hit_stack = hash_stack_.find(victim.key);
-        if (hit_stack != hash_stack_.end())
-            hit_stack->second->data = cache_.end();
+        QueueRecord victim = queue_.back();
+        queue_.pop_back();
+        hash_queue_.erase(victim.key);
+
+        auto it = hash_stack_.find(victim.key);
+        if (it != hash_stack_.end())
+            it->second->data = cache_.end();
 
         cache_.erase(victim.data);
-        hash_queue_.erase(victim.key);
-        queue_.pop_back();
     }
 
 public:
     explicit LIRSCache(std::size_t capacity) :
         capacity_(capacity),
-        lirs_max_(capacity - std::max<std::size_t>(1, capacity / 100))
+        lirs_max_(capacity > 0 ? capacity - std::max<std::size_t>(1, capacity / 100) : 0)
     {}
+
+    std::size_t max_capacity() const { return capacity_ ; }
 
     bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
+        if (max_capacity() == 0)
+            return false;
+
         auto hit_stack = hash_stack_.find(key);
+        bool in_stack = hit_stack != hash_stack_.end();
         auto hit_queue = hash_queue_.find(key);
+        bool in_queue = hit_queue != hash_queue_.end();
 
-        bool was_in_stack = hit_stack != hash_stack_.end();
-        bool was_in_queue = hit_queue != hash_queue_.end();
-
-        if (is_lir(key))
+        if (in_stack && hit_stack->second->status == BlockStatus::LIR)
         {
             bool was_at_bottom = (hit_stack->second == std::prev(stack_.end()));
             stack_.splice(stack_.begin(), stack_, hit_stack->second);
@@ -134,61 +122,73 @@ public:
             return true;
         }
 
-        if (is_resident(key))
+        if (in_queue)
         {
-            if (was_in_stack)
+            if (in_stack)
             {
                 stack_.splice(stack_.begin(), stack_, hit_stack->second);
-
                 hit_stack->second->status = BlockStatus::LIR;
                 ++lir_count_;
 
-                if (was_in_queue)
-                {
-                    queue_.erase(hit_queue->second);
-                    hash_queue_.erase(key);
-                }
+                queue_.erase(hit_queue->second);
+                hash_queue_.erase(key);
 
+                prune_stack();
                 demote_lir_bottom();
                 prune_stack();
-                return true;
+            }
+            else
+            {
+                queue_.splice(queue_.begin(), queue_, hit_queue->second);
+                stack_.emplace_front(key, hit_queue->second->data, BlockStatus::HIR);
+                hash_stack_.emplace(key, stack_.begin());
             }
 
-            queue_.splice(queue_.begin(), queue_, hit_queue->second);
             return true;
         }
 
         T page = slow_get_page(key);
 
-        if (lir_count_ < lirs_max_)
+        if (!is_full())
         {
             cache_.emplace_front(std::move(page));
-            stack_.emplace_front(key, cache_.begin(), BlockStatus::LIR);
-            hash_stack_.emplace(key, stack_.begin());
-            ++lir_count_;
+
+            if (lir_count_ < lirs_max_)
+            {
+                stack_.emplace_front(key, cache_.begin(), BlockStatus::LIR);
+                hash_stack_.emplace(key, stack_.begin());
+                ++lir_count_;
+            }
+            else
+            {
+                stack_.emplace_front(key, cache_.begin(), BlockStatus::HIR);
+                hash_stack_.emplace(key, stack_.begin());
+                queue_.emplace_front(key, cache_.begin());
+                hash_queue_.emplace(key, queue_.begin());
+            }
+
             return false;
         }
 
-        free_space();
+        evict_lru_hir();
+        cache_.emplace_front(std::move(page));
 
-        if (was_in_stack)
+        if (in_stack)
         {
-            cache_.emplace_front(std::move(page));
+            stack_.splice(stack_.begin(), stack_, hit_stack->second);
             hit_stack->second->data = cache_.begin();
             hit_stack->second->status = BlockStatus::LIR;
             ++lir_count_;
-            stack_.splice(stack_.begin(), stack_, hit_stack->second);
 
+            prune_stack();
             demote_lir_bottom();
             prune_stack();
         }
         else
         {
-            cache_.emplace_front(std::move(page));
             stack_.emplace_front(key, cache_.begin(), BlockStatus::HIR);
             hash_stack_.emplace(key, stack_.begin());
-
-            queue_.emplace_front(key, cache_.begin(), BlockStatus::HIR);
+            queue_.emplace_front(key, cache_.begin());
             hash_queue_.emplace(key, queue_.begin());
         }
 
