@@ -64,13 +64,23 @@ public:
 
     bool lookup_update(KeyT key, std::function<T(KeyT)> slow_get_page)
     {
+        bool loaded = false;
+        T page;
+
+        auto get_page = [&](KeyT key) -> T
+        {
+            if (!loaded)
+            {
+                page = slow_get_page(key);
+                loaded = true;
+            }
+
+            return page;
+        };
+
         for (const auto& level : cache_)
         {
-            // TODO: Here is a high perfomance issue, because we call slow_get_page() for each level
-            // that misses it before we meet a level which doesn't. It's pointeless, since we can
-            // get it once and then copy it forward to each next level. Still, it doesn't affect
-            // cache hit ratio, so we can test everything even with this flaw implementation
-            auto hit = level->lookup_update(key, slow_get_page);
+            auto hit = level->lookup_update(key, get_page);
             if (hit)
                 return true;
         }
