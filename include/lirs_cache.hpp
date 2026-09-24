@@ -16,22 +16,20 @@ template <typename T, typename KeyT = int> class LIRSCache : public BaseCache<T,
 {
     std::size_t capacity_, lirs_max_;
 
-    std::list<T> cache_; // resident pages only
+    std::list<T> cache_;
 
     enum class BlockStatus { LIR, HIR };
     using CacheIt = typename std::list<T>::iterator;
 
-    // LIRS stack S: front = top (most recently referenced), back = bottom.
     struct StackRecord
     {
         KeyT key;
-        CacheIt data; // cache_.end() means non-resident
+        CacheIt data;
         BlockStatus status;
 
         StackRecord(KeyT k, CacheIt d, BlockStatus s) : key(k), data(d), status(s) {}
     };
 
-    // resident HIR list Q: front = MRU, back = LRU (eviction victim).
     struct QueueRecord
     {
         KeyT key;
@@ -50,7 +48,6 @@ template <typename T, typename KeyT = int> class LIRSCache : public BaseCache<T,
 
     std::size_t lir_count_ = 0;
 
-    // Remove HIR blocks at the bottom until an LIR block sits there.
     void prune_stack()
     {
         while (!stack_.empty() && stack_.back().status == BlockStatus::HIR)
@@ -60,7 +57,6 @@ template <typename T, typename KeyT = int> class LIRSCache : public BaseCache<T,
         }
     }
 
-    // Demote the bottom-most LIR block to HIR and append it to queue Q.
     void demote_lir_bottom()
     {
         if (stack_.empty() || stack_.back().status != BlockStatus::LIR)
