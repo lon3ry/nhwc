@@ -10,7 +10,7 @@ namespace caches {
 export template <typename T, typename KeyT = int>
 class BaseCache {
 public:
-  BaseCache(std::size_t capacity) : capacity_(capacity) {}
+  explicit BaseCache(std::size_t capacity) : capacity_(capacity) {}
   virtual ~BaseCache() = default;
 
   std::size_t max_capacity() const { return capacity_; }

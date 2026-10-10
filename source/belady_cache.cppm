@@ -29,7 +29,7 @@ namespace caches {
 export template <typename Key, typename Value>
 class BeladyCache {
 public:
-  BeladyCache(std::size_t capacity) : capacity_(capacity) {}
+  explicit BeladyCache(std::size_t capacity) : capacity_(capacity) {}
 
   std::size_t max_capacity() const { return capacity_; }
   bool is_full() const { return (capacity_ == cache_map_.size()); }

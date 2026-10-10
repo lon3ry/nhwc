@@ -38,7 +38,7 @@ export CacheType string_to_cache_type(const std::string_view str) {
 export template <typename Key, typename Value>
 class MultiLevelCache {
 public:
-  MultiLevelCache(std::ranges::input_range auto&& levels) {
+  explicit MultiLevelCache(std::ranges::sized_range auto&& levels) {
     for (const auto& level : levels) {
       switch (level.type) {
         case CacheType::kARC:
