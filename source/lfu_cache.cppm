@@ -14,15 +14,31 @@ namespace caches {
 export template <typename Key, typename Value>
 class LFUCache final : public BaseCache<Key, Value> {
 public:
-  LFUCache(std::size_t capacity) : capacity_(capacity), min_freq_(1) {}
+  using BaseCache<Key, Value>::max_capacity;
+  LFUCache(std::size_t capacity) : BaseCache<Key, Value>(capacity), min_freq_(1) {}
 
-  std::size_t max_capacity() const { return capacity_; }
-  bool is_full() const { return (capacity_ == cache_map_.size()); }
+  bool is_full() const { return max_capacity() == cache_map_.size(); }
 
-  bool lookup_update(Key& key, std::function<Value(Key)> slow_get_page) {
-    if (max_capacity() == 0)
-      return false;
+private:
+  std::size_t min_freq_;
 
+  struct Record {
+    Key key;
+    Value page;
+    std::size_t freq;
+  };
+
+  using NodeIt = typename std::list<Record>::iterator;
+  std::unordered_map<Key, NodeIt> cache_map_;
+  std::unordered_map<size_t, std::list<Record>> freq_to_list_map_;
+
+  void check_freq_bucket_for_emptiness(std::size_t freq) {
+    if (freq_to_list_map_[freq].empty()) {
+      freq_to_list_map_.erase(freq);
+    }
+  }
+
+  bool do_lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) {
     if (auto it = cache_map_.find(key); it != cache_map_.end()) {
       const std::size_t old_freq = it->second->freq;
       auto& new_bucket = freq_to_list_map_[old_freq + 1];
@@ -51,25 +67,6 @@ public:
 
       return false;
     }
-  }
-
-private:
-  const std::size_t capacity_;
-  std::size_t min_freq_;
-
-  struct Record {
-    Key key;
-    Value page;
-    std::size_t freq;
-  };
-
-  using NodeIt = typename std::list<Record>::iterator;
-  std::unordered_map<Key, NodeIt> cache_map_;
-  std::unordered_map<size_t, std::list<Record>> freq_to_list_map_;
-
-  void check_freq_bucket_for_emptiness(std::size_t freq) {
-    if (freq_to_list_map_[freq].empty())
-        freq_to_list_map_.erase(freq);
   }
 };
 
