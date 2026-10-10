@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (std::cin.peek() != std::char_traits<char>::eof()) {
-    std::println("warning: too much arguments, only {} requests were handled.", data_len);
+    std::println(stderr, "warning: too much arguments, only {} requests were handled.", data_len);
   }
 
   std::println("{}", hits);
