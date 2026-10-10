@@ -26,7 +26,7 @@ parse_cache_levels_algorithms(const std::filesystem::path& config_path) {
   std::size_t cache_levels;
 
   file >> cache_levels;
-  for (const auto _ : std::views::iota(0uz, cache_levels)) {
+  for (auto _ : std::views::iota(0uz, cache_levels)) {
     std::string level_algorithm;
     file >> level_algorithm;
     levels.emplace_back(caches::string_to_cache_type(level_algorithm), 0);

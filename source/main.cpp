@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
   auto load = [](PageId key) { return key; };
 
   unsigned int hits = 0;
-  for (const auto& _ : std::views::iota(0uz, data_len)) {
+  for (auto _ : std::views::iota(0uz, data_len)) {
     auto key = util::read_integer<PageId>();
     if (!key) return 1;
 
