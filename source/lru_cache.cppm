@@ -28,7 +28,7 @@ private:
 
   bool is_full() const { return (cache_.size() == max_capacity()); }
 
-  bool do_lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) {
+  bool do_lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) override {
     auto hit = hash_.find(key);
     if (hit != hash_.end()) {
       auto eltit = hit->second;

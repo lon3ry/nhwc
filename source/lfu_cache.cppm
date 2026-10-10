@@ -38,7 +38,7 @@ private:
     }
   }
 
-  bool do_lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) {
+  bool do_lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) override {
     if (auto it = cache_map_.find(key); it != cache_map_.end()) {
       const std::size_t old_freq = it->second->freq;
       auto& new_bucket = freq_to_list_map_[old_freq + 1];

@@ -203,7 +203,7 @@ private:
     add_to_queue_top(key, data);
   }
 
-  bool do_lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) {
+  bool do_lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) override {
     if (lookup_lir(key) || lookup_hir(key)) {
       return true;
     } else {

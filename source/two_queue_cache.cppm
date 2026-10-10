@@ -41,7 +41,7 @@ private:
     }
   }
 
-  bool do_lookup_update(const KeyT& key, std::function<T(KeyT)> slow_get_page) {
+  bool do_lookup_update(const KeyT& key, std::function<T(KeyT)> slow_get_page) override {
     auto hit_am = am_.lookup(key);
     if (hit_am)
       return true;
