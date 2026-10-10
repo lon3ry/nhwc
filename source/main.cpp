@@ -44,11 +44,7 @@ int main(int argc, char* argv[]) {
   for (auto _ : std::views::iota(0uz, data_len)) {
     auto key = util::read_integer<PageId>();
     if (!key) return 1;
-
-    bool hit = cache.lookup_update(key.value(), load);
-    if (hit) {
-      ++hits;
-    }
+    hits += cache.lookup_update(key.value(), load);
   }
 
   if (std::cin.peek() != std::char_traits<char>::eof()) {
