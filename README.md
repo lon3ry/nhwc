@@ -53,7 +53,6 @@ uv run main.py
 ```
 This will run the benchmark with default configuration. See `--help` for all available options.
 
-
 There are various data patterns supported:
 
 | Pattern                  | Description                                                           |
@@ -95,15 +94,9 @@ It's possible to decide how to divide cache capacity between its levels. Support
 | `equal`     | Each level has the same size                          |
 | `geometric` | Each next level is twice as large as the previous one |
 
-### Conclusion
+## Results
 
-In our case, when each level has the same access complexity, there is absolutely no need to use more than 2 cache levels.
-
-For two levels of caching, LFU is the best option for the first level. For the second level, however, it depends on your strategy for dividing the available space between the levels.
-
-More advanced algorithms like ARC, LIRS, and 2Q are the best for some specific scenarios. Still, simple strategies like LRU and LFU outperform them in most tests.
-
-The best choice depends on your data pattern. If you know which patterns are more typical for your purposes, then you can stick with the best configuration on the specific tests. With more complex environments, it's worth using ARC or LIRS since they are made to be adaptive for various data patterns.
+See [bench/README.md](bench/README.md) for our results.
 
 ## References
 
