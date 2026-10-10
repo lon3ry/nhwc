@@ -44,7 +44,9 @@ def main():
 
     benchmarker = Benchmarker(args.levels, nhwc.SUPPORTED_CACHE_ALGORITHMS, policies, patterns)
     result = benchmarker.run(args.cache_size, args.requests, args.keys, args.seed)
-    benchmarker.save_report(benchmarker.analyze(result), args.output)
+    best = benchmarker.analyze(result)
+    benchmarker.save_report(best, args.output)
+    benchmarker.save_hist(result, "top5")
 
 
 if __name__ == "__main__":

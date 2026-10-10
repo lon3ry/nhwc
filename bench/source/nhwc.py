@@ -4,8 +4,8 @@ import os
 
 
 SUPPORTED_CACHE_ALGORITHMS = ["ARC", "LFU", "LRU", "2Q", "LIRS"]
-MAIN_BINARY_PATH = "../build/nhwc"
-IDEAL_BINARY_PATH = "../build/ideal_cache"
+MAIN_BINARY_PATH = "../../build/nhwc"
+IDEAL_BINARY_PATH = "../../build/ideal_cache"
 
 
 def run_cache_binary(path, data, config_path=None):
