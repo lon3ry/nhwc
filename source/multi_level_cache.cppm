@@ -4,6 +4,7 @@ module;
 #include <functional>
 #include <vector>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
