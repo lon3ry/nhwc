@@ -62,16 +62,13 @@ public:
   }
 
   bool lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) {
-    bool loaded = false;
-    Value page;
+    std::optional<Value> page;
 
-    auto get_page = [&](Key key) -> Value {
-      if (!loaded) {
+    auto get_page = [&](const Key& key) -> const Value& {
+      if (!page) {
         page = slow_get_page(key);
-        loaded = true;
       }
-
-      return page;
+      return *page;
     };
 
     for (const auto& level : cache_) {
