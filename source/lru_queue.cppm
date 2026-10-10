@@ -31,7 +31,7 @@ public:
     return false;
   }
 
-  void insert(QueueItem item) {
+  void insert(const QueueItem& item) {
     cache_.emplace_front(item);
     hash_.emplace(get_key(item), cache_.begin());
   }
@@ -50,7 +50,7 @@ private:
   using QueueIt = typename std::list<QueueItem>::iterator;
   std::unordered_map<Key, QueueIt> hash_;
 
-  auto get_key(const QueueItem& item) {
+  static auto get_key(const QueueItem& item) {
     if constexpr (std::is_same_v<Key, QueueItem>) {
       return item;
     } else {
