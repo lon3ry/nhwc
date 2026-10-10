@@ -7,7 +7,7 @@ export module base_cache;
 
 namespace caches {
 
-export template <typename T, typename KeyT = int>
+export template <typename Key, typename Value>
 class BaseCache {
 public:
   explicit BaseCache(std::size_t capacity) : capacity_(capacity) {}
@@ -15,7 +15,7 @@ public:
 
   std::size_t max_capacity() const { return capacity_; }
 
-  bool lookup_update(const KeyT& key, std::function<T(KeyT)> slow_get_page) {
+  bool lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) {
     if (max_capacity() == 0) {
       return false;
     }
@@ -26,7 +26,7 @@ public:
 private:
   std::size_t capacity_;
 
-  virtual bool do_lookup_update(const KeyT& key, std::function<T(KeyT)> slow_get_page) = 0;
+  virtual bool do_lookup_update(const Key& key, std::function<Value(Key)> slow_get_page) = 0;
 };
 
 }  // namespace caches
