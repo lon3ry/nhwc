@@ -39,12 +39,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
-    - name: Set reusable strings
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
     - name: Configure CMake (Linux, Windows w/o MSVC, macOS w/o Clang)
       if: >
         matrix.cpp_compiler != 'cl' &&
@@ -53,7 +47,7 @@ jobs:
           matrix.cpp_compiler != 'clang++'
         )
       run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }} -G Ninja
+        cmake -B ${{ github.workspace }}/build -G Ninja
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
@@ -61,7 +55,7 @@ jobs:
     - name: Configure CMake (macOS, Clang)
       if: matrix.os == 'macos-26' && matrix.cpp_compiler == 'clang++'
       run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }} -G Ninja
+        cmake -B ${{ github.workspace }}/build -G Ninja
         -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@20)/bin/clang++
         -DCMAKE_OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
@@ -70,15 +64,15 @@ jobs:
     - name: Configure CMake (Windows, MSVC)
       if: matrix.os == 'windows-latest' && matrix.cpp_compiler == 'cl'
       run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        cmake -B ${{ github.workspace }}/build
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
 
     - name: Build
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.build_type }}
 
     - name: Test
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      working-directory: ${{ github.workspace }}/build
       run: ctest --build-config ${{ matrix.build_type }}
