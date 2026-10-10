@@ -2,7 +2,7 @@ module;
 
 #include <cstddef>
 #include <functional>
-#include <list>
+#include <vector>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -39,6 +39,7 @@ export template <typename Key, typename Value>
 class MultiLevelCache {
 public:
   explicit MultiLevelCache(std::ranges::sized_range auto&& levels) {
+    cache_.reserve(std::ranges::size(levels));
     for (const auto& level : levels) {
       switch (level.type) {
         case CacheType::kARC:
@@ -81,7 +82,7 @@ public:
   }
 
 private:
-  std::list<std::unique_ptr<BaseCache<Key, Value>>> cache_;
+  std::vector<std::unique_ptr<BaseCache<Key, Value>>> cache_;
 };
 
 }  // namespace caches
