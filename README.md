@@ -2,38 +2,29 @@
 
 A cache algorithms research homework from [Kostantin Vladimirov's course](https://github.com/tilir/cpp-graduate). Co-authored with [Sergey Kovalenko](https://github.com/serhiosmol) and [Dmitry Lominin](https://github.com/LomininD).
 
-This project implements multi-level cache with various algorithms supported.
+This project implements multi-level cache with various policies supported, such as:
+
+- 2Q
+
+- ARC
+
+- LFU
+
+- LIRS
+
+- LRU
 
 ## Building
 
 You need to have [CMake](https://cmake.org) 3.28+, compatible build tools (see [CMake Generators](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) for more information) with [modules support](https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html#generator-support) and a compiler with C++23 support installed.
 
-To configure the build on macOS and Linux, run:
-```shell
-cmake -B build -G Ninja
-```
-
-On Windows:
-```shell
-cmake -G "Visual Studio 18 2026"
-```
-or
-```shell
-cmake -G "Visual Studio 17 2022"
-```
-
-Then run:
-```shell
-cmake --build build
-```
-
 ## Running
 
-First of all, you need to create a config file. The default one is `config.txt`, but you can select a different file with `--config` option.
+Submitting config with `--config` option is required.
 
 The config file format is:
 ```
-<number_of_levels> <cache_algorithms>
+<number_of_levels> <cache_policies>
 ```
 For example:
 ```
@@ -42,32 +33,16 @@ For example:
 ```
 1 ARC
 ```
-
-Following algorithms are supported:
-
-- ARC
-
-- 2Q
-
-- LRU
-
-- LFU
-
-- LIRS
-
 The program accepts size of cache levels, then data set size and a sequence of requests. For example:
 ```shell
 echo 2 ARC 2Q > config.txt
-echo 2 4 6 1 2 1 2 1 2 | ./build/main
+echo 2 4 6 1 2 1 2 1 2 | ./build/nhwc --config config.txt
 ```
 In this case we have a two-level cache with ARC cache (size 2) and 2Q (size 4) and a sequence with 6 requests.
 
 ## Testing
 
-We use [GoogleTest](https://google.github.io/googletest) framework for our tests. You can run them with:
-```shell
-ctest --test-dir build --output-on-failure
-```
+We use [GoogleTest](https://google.github.io/googletest) framework for our tests. You can run them using [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html).
 
 ## Benchmarking
 
@@ -76,21 +51,10 @@ This project includes various benchmarks. To run them, install [uv](https://docs
 cd bench
 uv run main.py
 ```
+This will run the benchmark with default configuration. See `--help` for all available options.
 
-The following options are supported:
 
-| Option                       | Description                                                                |         Default |
-| ---------------------------- | -------------------------------------------------------------------------- | --------------: |
-| `-s`, `--cache-size`         | Total cache size                                                           |         `13020` |
-| `-l`, `--levels`             | Number of maximum cache levels                                             |             `5` |
-| `-r`, `--requests`           | Number of requests to generate                                             |        `131072` |
-| `-k`, `--keys`               | Number of unique keys                                                      |         `65536` |
-| `-g`, `--seed`               | Random seed for reproducible generation                                    |            `42` |
-| `-p`, `--pattern`            | Workload generation pattern; can be `all` or one of the available patterns |           `all` |
-| `-sp`, `--sharing-policy`    | The capacity sharing policy used for multi-level cache                     |           `all` |
-| `-o`, `--output`             | Output file path                                                           |     `report.md` |
-
-Available patterns:
+There are various data patterns supported:
 
 | Pattern                  | Description                                                           |
 | ------------------------ | --------------------------------------------------------------------- |
@@ -124,91 +88,12 @@ Available patterns:
 | `clustered_random`       | Random accesses are concentrated within temporary key clusters        |
 | `looping_working_set`    | Repeatedly accesses one working set in a shuffled order               |
 
-Supported capacity sharing policies are:
+It's possible to decide how to divide cache capacity between its levels. Supported capacity sharing policies are:
 
 | Policy      | Description                                           |
 | ------------| ----------------------------------------------------- |
 | `equal`     | Each level has the same size                          |
 | `geometric` | Each next level is twice as large as the previous one |
-
-## Results
-
-Here are the results got from running:
-```shell
-uv run main.py \
-    --cache-size=13020 \
-    --keys=131072 \
-    --requests=1048576 \
-    --seed=42
-```
-
-### Policy: equal
-
-| Pattern                | Best Configuration      |   Best Hit (%) |   Best Diff Ideal (%) | Single Algorithm        |   Single Hit (%) |   Single Diff Ideal (%) | Multi Algorithm                                                                              |   Multi Hit (%) |   Multi Diff Ideal (%) |
-|:-----------------------|:------------------------|---------------:|----------------------:|:------------------------|-----------------:|------------------------:|:---------------------------------------------------------------------------------------------|----------------:|-----------------------:|
-| scan                   | LIRS                    |           8.61 |                  0.09 | LIRS                    |             8.61 |                    0.09 | 2Q + LIRS, ARC + LIRS, LFU + LIRS, LIRS + 2Q, LIRS + ARC, LIRS + LFU, LIRS + LRU, LRU + LIRS |            4.30 |                   4.39 |
-| cyclic_working_set     | 2Q, ARC, LFU, LIRS, LRU |          98.76 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            98.76 |                    0.00 | LIRS + 2Q                                                                                    |           97.31 |                   1.45 |
-| just_over_cache        | 2Q                      |          97.80 |                  0.95 | 2Q                      |            97.80 |                    0.95 | LIRS + 2Q                                                                                    |           97.30 |                   1.45 |
-| hot_cold               | LIRS                    |          80.44 |                  4.45 | LIRS                    |            80.44 |                    4.45 | LFU + LRU                                                                                    |           80.28 |                   4.61 |
-| zipf                   | ARC                     |          92.87 |                  1.68 | ARC                     |            92.87 |                    1.68 | LFU + LIRS                                                                                   |           92.60 |                   1.95 |
-| strong_zipf            | 2Q, ARC, LFU, LIRS, LRU |          99.87 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            99.87 |                    0.00 | 320                                                                                          |           99.87 |                   0.00 |
-| random                 | LIRS                    |           9.90 |                 29.92 | LIRS                    |             9.90 |                   29.92 | LFU + LIRS                                                                                   |            9.65 |                  30.17 |
-| burst                  | LRU                     |          62.84 |                  9.39 | LRU                     |            62.84 |                    9.39 | LIRS + ARC                                                                                   |           58.97 |                  13.26 |
-| switching_working_sets | LRU                     |          65.94 |                  7.98 | LRU                     |            65.94 |                    7.98 | LFU + LIRS + ARC                                                                             |           59.93 |                  13.99 |
-| returning_working_sets | LRU                     |          51.59 |                 16.22 | LRU                     |            51.59 |                   16.22 | LIRS + ARC                                                                                   |           48.56 |                  19.26 |
-| alternating_regions    | LFU + 2Q                |          54.22 |                 25.93 | LIRS                    |            52.15 |                   28.00 | LFU + 2Q                                                                                     |           54.22 |                  25.93 |
-| drifting_popularity    | ARC                     |          82.89 |                  4.26 | ARC                     |            82.89 |                    4.26 | LIRS + LRU                                                                                   |           66.34 |                  20.80 |
-| flash_crowd            | LRU                     |          26.72 |                 23.33 | LRU                     |            26.72 |                   23.33 | LIRS + LRU                                                                                   |           21.03 |                  29.02 |
-| recent_history_reuse   | LRU                     |          81.92 |                  4.31 | LRU                     |            81.92 |                    4.31 | LIRS + LRU                                                                                   |           81.18 |                   5.05 |
-| delayed_history_reuse  | LIRS                    |          39.47 |                 18.61 | LIRS                    |            39.47 |                   18.61 | ARC + LIRS                                                                                   |           30.51 |                  27.57 |
-| periodic_hot_set       | LFU + ARC               |          25.09 |                 21.56 | LFU                     |            25.03 |                   21.62 | LFU + ARC                                                                                    |           25.09 |                  21.56 |
-| three_frequency_tiers  | LFU + ARC               |          49.28 |                 15.62 | LFU                     |            49.12 |                   15.78 | LFU + ARC                                                                                    |           49.28 |                  15.62 |
-| local_walk             | 2Q, ARC, LFU, LIRS, LRU |          99.78 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            99.78 |                    0.00 | 320                                                                                          |           99.78 |                   0.00 |
-| scan_with_reuse        | LIRS                    |          23.89 |                  3.10 | LIRS                    |            23.89 |                    3.10 | LFU + LIRS                                                                                   |           23.71 |                   3.29 |
-| two_phase              | 2Q, LRU                 |          97.52 |                  0.00 | 2Q, LRU                 |            97.52 |                    0.00 | LFU + LRU                                                                                    |           73.03 |                  24.49 |
-| hot_noise              | LFU                     |          66.61 |                  7.53 | LFU                     |            66.61 |                    7.53 | LFU + ARC                                                                                    |           65.92 |                   8.22 |
-| repeated_scan          | 2Q, ARC, LFU, LIRS, LRU |          98.76 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            98.76 |                    0.00 | LIRS + 2Q                                                                                    |           97.31 |                   1.45 |
-| mixed_scan_random      | LFU                     |           8.31 |                 20.80 | LFU                     |             8.31 |                   20.80 | LFU + 2Q                                                                                     |            7.23 |                  21.88 |
-| working_set_growth     | LRU                     |          81.24 |                  9.70 | LRU                     |            81.24 |                    9.70 | LIRS + ARC                                                                                   |           70.97 |                  19.96 |
-| working_set_shrink     | LRU                     |          81.18 |                  9.74 | LRU                     |            81.18 |                    9.74 | LIRS + ARC                                                                                   |           70.90 |                  20.02 |
-| rotating_hot_sets      | 2Q, LRU                 |          59.49 |                  2.55 | 2Q, LRU                 |            59.49 |                    2.55 | LIRS + ARC                                                                                   |           58.26 |                   3.77 |
-| random_bursts          | 2Q, ARC, LFU, LIRS, LRU |          99.99 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            99.99 |                    0.00 | 320                                                                                          |           99.99 |                   0.00 |
-| clustered_random       | LRU                     |          30.67 |                 20.80 | LRU                     |            30.67 |                   20.80 | LIRS + ARC                                                                                   |           27.73 |                  23.74 |
-| looping_working_set    | 2Q, ARC, LFU, LIRS, LRU |          98.76 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            98.76 |                    0.00 | LFU + LIRS                                                                                   |           89.69 |                   9.07 |
-
-### Policy: geometric
-
-| Pattern                | Best Configuration      |   Best Hit (%) |   Best Diff Ideal (%) | Single Algorithm        |   Single Hit (%) |   Single Diff Ideal (%) | Multi Algorithm                               |   Multi Hit (%) |   Multi Diff Ideal (%) |
-|:-----------------------|:------------------------|---------------:|----------------------:|:------------------------|-----------------:|------------------------:|:----------------------------------------------|----------------:|-----------------------:|
-| scan                   | LIRS                    |           8.61 |                  0.09 | LIRS                    |             8.61 |                    0.09 | 2Q + LIRS, ARC + LIRS, LFU + LIRS, LRU + LIRS |            5.74 |                   2.95 |
-| cyclic_working_set     | 2Q, ARC, LFU, LIRS, LRU |          98.76 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            98.76 |                    0.00 | LIRS + 2Q                                     |           97.48 |                   1.28 |
-| just_over_cache        | 2Q                      |          97.80 |                  0.95 | 2Q                      |            97.80 |                    0.95 | LIRS + 2Q                                     |           97.46 |                   1.29 |
-| hot_cold               | LIRS                    |          80.44 |                  4.45 | LIRS                    |            80.44 |                    4.45 | LFU + ARC                                     |           80.34 |                   4.56 |
-| zipf                   | ARC                     |          92.87 |                  1.68 | ARC                     |            92.87 |                    1.68 | LFU + LIRS                                    |           92.66 |                   1.89 |
-| strong_zipf            | 2Q, ARC, LFU, LIRS, LRU |          99.87 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            99.87 |                    0.00 | 320                                           |           99.87 |                   0.00 |
-| random                 | LIRS                    |           9.90 |                 29.92 | LIRS                    |             9.90 |                   29.92 | LFU + LIRS                                    |            9.73 |                  30.09 |
-| burst                  | LRU                     |          62.84 |                  9.39 | LRU                     |            62.84 |                    9.39 | LFU + LRU                                     |           56.93 |                  15.29 |
-| switching_working_sets | LRU                     |          65.94 |                  7.98 | LRU                     |            65.94 |                    7.98 | LFU + LRU                                     |           62.97 |                  10.95 |
-| returning_working_sets | LRU                     |          51.59 |                 16.22 | LRU                     |            51.59 |                   16.22 | LIRS + ARC                                    |           49.76 |                  18.05 |
-| alternating_regions    | LFU + 2Q                |          55.30 |                 24.85 | LIRS                    |            52.15 |                   28.00 | LFU + 2Q                                      |           55.30 |                  24.85 |
-| drifting_popularity    | ARC                     |          82.89 |                  4.26 | ARC                     |            82.89 |                    4.26 | 2Q + LRU                                      |           66.79 |                  20.35 |
-| flash_crowd            | LRU                     |          26.72 |                 23.33 | LRU                     |            26.72 |                   23.33 | LFU + LRU                                     |           21.29 |                  28.76 |
-| recent_history_reuse   | LRU                     |          81.92 |                  4.31 | LRU                     |            81.92 |                    4.31 | LIRS + LRU                                    |           79.46 |                   6.77 |
-| delayed_history_reuse  | LIRS                    |          39.47 |                 18.61 | LIRS                    |            39.47 |                   18.61 | ARC + LIRS                                    |           33.42 |                  24.66 |
-| periodic_hot_set       | LFU                     |          25.03 |                 21.62 | LFU                     |            25.03 |                   21.62 | LFU + ARC                                     |           24.40 |                  22.25 |
-| three_frequency_tiers  | LFU                     |          49.12 |                 15.78 | LFU                     |            49.12 |                   15.78 | LFU + ARC                                     |           48.83 |                  16.07 |
-| local_walk             | 2Q, ARC, LFU, LIRS, LRU |          99.78 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            99.78 |                    0.00 | 320                                           |           99.78 |                   0.00 |
-| scan_with_reuse        | LFU + LIRS              |          24.47 |                  2.52 | LIRS                    |            23.89 |                    3.10 | LFU + LIRS                                    |           24.47 |                   2.52 |
-| two_phase              | 2Q, LRU                 |          97.52 |                  0.00 | 2Q, LRU                 |            97.52 |                    0.00 | LFU + LRU                                     |           81.34 |                  16.18 |
-| hot_noise              | LFU                     |          66.61 |                  7.53 | LFU                     |            66.61 |                    7.53 | LFU + ARC                                     |           65.35 |                   8.79 |
-| repeated_scan          | 2Q, ARC, LFU, LIRS, LRU |          98.76 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            98.76 |                    0.00 | LIRS + 2Q                                     |           97.48 |                   1.28 |
-| mixed_scan_random      | LFU                     |           8.31 |                 20.80 | LFU                     |             8.31 |                   20.80 | LFU + 2Q                                      |            7.30 |                  21.81 |
-| working_set_growth     | LRU                     |          81.24 |                  9.70 | LRU                     |            81.24 |                    9.70 | 2Q + LRU                                      |           70.07 |                  20.86 |
-| working_set_shrink     | LRU                     |          81.18 |                  9.74 | LRU                     |            81.18 |                    9.74 | LFU + LRU                                     |           71.67 |                  19.25 |
-| rotating_hot_sets      | 2Q, LRU                 |          59.49 |                  2.55 | 2Q, LRU                 |            59.49 |                    2.55 | 2Q + ARC                                      |           56.96 |                   5.08 |
-| random_bursts          | 2Q, ARC, LFU, LIRS, LRU |          99.99 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            99.99 |                    0.00 | 320                                           |           99.99 |                   0.00 |
-| clustered_random       | LRU                     |          30.67 |                 20.80 | LRU                     |            30.67 |                   20.80 | LIRS + ARC                                    |           29.05 |                  22.42 |
-| looping_working_set    | 2Q, ARC, LFU, LIRS, LRU |          98.76 |                  0.00 | 2Q, ARC, LFU, LIRS, LRU |            98.76 |                    0.00 | LFU + LIRS                                    |           88.39 |                  10.37 |
 
 ### Conclusion
 
