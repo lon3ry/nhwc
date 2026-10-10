@@ -133,8 +133,10 @@ TEST(BeladyCacheTest, CacheHitsTest) {
   for (auto test : test_cases) {
     SCOPED_TRACE("test vector: " + ::testing::PrintToString(test.values));
 
+    auto load = [](int key) { return key; };
+
     caches::BeladyCache<int, int> cache(test.cache_size);
-    int hits = static_cast<int>(cache.calculate_hits(test.values));
+    int hits = static_cast<int>(cache.calculate_hits(test.values, load));
 
     EXPECT_EQ(hits, test.hits);
   }

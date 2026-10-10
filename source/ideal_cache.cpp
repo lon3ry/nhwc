@@ -28,5 +28,7 @@ int main() {
     std::println("warning: too much arguments, only {} requests were handled.", data_len.value());
   }
 
-  std::println("{}", cache.calculate_hits(requests));
+  auto load = [](PageId key) { return key; };
+
+  std::println("{}", cache.calculate_hits(requests, load));
 }
