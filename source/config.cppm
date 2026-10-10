@@ -25,6 +25,7 @@ parse_cache_levels_algorithms(const std::filesystem::path& config_path) {
   std::vector<caches::CacheLevel> levels;
   std::size_t cache_levels;
 
+  // TODO: see istream iterators with range
   file >> cache_levels;
   for (auto _ : std::views::iota(0uz, cache_levels)) {
     std::string level_algorithm;
