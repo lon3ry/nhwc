@@ -18,7 +18,7 @@ parse_cache_levels_algorithms(const std::filesystem::path& config_path) {
   std::ifstream file{config_path};
 
   if (!file) {
-    std::println("Unable to open config file {}", config_path.string());
+    std::println("Unable to open config file {}", config_path.native());
     std::exit(1);
   }
 
