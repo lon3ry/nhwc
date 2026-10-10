@@ -82,8 +82,3 @@ jobs:
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: ctest --build-config ${{ matrix.build_type }}
-
-    - uses: actions/upload-artifact@v6
-      with:
-        name: ${{ matrix.os }}-${{ matrix.cpp_compiler }}-build
-        path: build
